@@ -14,9 +14,10 @@ export function LogoMark({ className }: { className?: string }) {
       className={cn("h-9 w-9", className)}
     >
       <defs>
+        {/* Colors follow the platform theme via CSS variables. */}
         <linearGradient id="ic-grad" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#4F46E5" />
-          <stop offset="1" stopColor="#7C3AED" />
+          <stop stopColor="var(--primary)" />
+          <stop offset="1" stopColor="var(--violet)" />
         </linearGradient>
       </defs>
       <rect x="1" y="1" width="38" height="38" rx="11" fill="url(#ic-grad)" />

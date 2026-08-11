@@ -4,6 +4,7 @@ import type {
   MeetingReviewPayload,
   MeetingStatusInfo,
   MeetingSummaryItem,
+  MeetingTranscript,
   Paginated,
   Task,
 } from "@/types";
@@ -25,6 +26,8 @@ export interface CreateMeetingPayload {
   notes?: string;
   participant_ids?: string[];
   transcript?: File | null;
+  /** Paste-in transcript text — stored as a TXT transcript server-side. */
+  transcript_text?: string;
   audio?: File | null;
 }
 
@@ -67,6 +70,7 @@ export const meetingsService = {
       form.append("participant_ids", JSON.stringify(payload.participant_ids));
     }
     if (payload.transcript) form.append("transcript", payload.transcript);
+    if (payload.transcript_text) form.append("transcript_text", payload.transcript_text);
     if (payload.audio) form.append("audio", payload.audio);
     return api.uploadWithProgress<MeetingDetail>("/meetings/", form, onProgress);
   },
@@ -102,6 +106,11 @@ export const meetingsService = {
 
   async pdfUrl(id: string) {
     return api.get<{ url: string; filename: string }>(`/meetings/${id}/pdf/`);
+  },
+
+  /** Transcript text split into speaker turns, matched against people. */
+  async transcript(id: string) {
+    return api.get<MeetingTranscript>(`/meetings/${id}/transcript/`);
   },
 };
 

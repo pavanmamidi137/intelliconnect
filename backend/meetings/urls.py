@@ -6,6 +6,7 @@ from .views import (
     MeetingProcessView,
     MeetingReviewView,
     MeetingStatusView,
+    MeetingTranscriptView,
     MeetingViewSet,
 )
 
@@ -29,4 +30,9 @@ urlpatterns = [
         name="meetings-generate-report",
     ),
     path("meetings/<uuid:id>/pdf/", MeetingPdfView.as_view(), name="meetings-pdf"),
+    path(
+        "meetings/<uuid:id>/transcript/",
+        MeetingTranscriptView.as_view(),
+        name="meetings-transcript",
+    ),
 ]

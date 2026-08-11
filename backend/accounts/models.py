@@ -30,10 +30,12 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser, PermissionsMixin):
     class Role(models.TextChoices):
-        """Platform role — hosts manage their own organization; admins
-        manage the whole platform (app management dashboard)."""
+        """Platform roles — hosts manage their own organization; super
+        admins manage the whole platform (app management dashboard)."""
 
         HOST = "host", "Host"
+        SUPERADMIN = "superadmin", "Super Admin"
+        # Legacy alias kept for rows created before superadmin existed.
         ADMIN = "admin", "Admin"
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -43,7 +45,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         max_length=16,
         choices=Role.choices,
         default=Role.HOST,
-        help_text="host = manages their own organization; admin = platform app management",
+        help_text="host = manages their own organization; superadmin = platform app management",
     )
     organization = models.ForeignKey(
         "organizations.Organization",
@@ -80,3 +82,19 @@ class PasswordResetToken(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
     used = models.BooleanField(default=False)
+
+
+class LoginOTP(models.Model):
+    """Six-digit email verification code for passwordless login.
+
+    One active code per user (requesting a new code invalidates the
+    previous one). Codes expire after 10 minutes and are single-use.
+    """
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="login_otps")
+    code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    used = models.BooleanField(default=False)
+    attempts = models.PositiveSmallIntegerField(default=0)

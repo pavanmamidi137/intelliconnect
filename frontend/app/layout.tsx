@@ -34,8 +34,10 @@ export const metadata: Metadata = {
     "task extraction",
     "meeting reports",
   ],
+  // The favicon is served by a dynamic route so the browser tab icon
+  // follows the super-admin platform theme.
   icons: {
-    icon: "/icon.svg",
+    icon: "/theme-icon",
   },
 };
 

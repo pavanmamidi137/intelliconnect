@@ -138,7 +138,7 @@ export function ReviewTaskCard({ task, people, onUpdate, onRemove }: ReviewTaskC
 
       {/* assignee */}
       <div className="mt-3 flex items-center gap-2">
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500/15 to-violet-500/15 text-primary">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500/15 to-sky-500/15 text-primary">
           <UserRound className="h-4 w-4" aria-hidden="true" />
         </span>
         <Select

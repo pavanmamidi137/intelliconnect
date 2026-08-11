@@ -1,9 +1,9 @@
-"""Create a platform admin (app-management role) user.
+"""Create a platform super admin (app-management role) user.
 
 Usage:
     python manage.py create_admin --email admin@example.com --password <pw>
 
-Platform admins see the app-management dashboard and can manage all
+Super admins see the app-management dashboard and can manage all
 organizations, users, and meetings. They are not tied to an organization.
 """
 
@@ -14,7 +14,7 @@ User = get_user_model()
 
 
 class Command(BaseCommand):
-    help = "Create a platform admin user (app-management role)."
+    help = "Create a platform super admin user (app-management role)."
 
     def add_arguments(self, parser):
         parser.add_argument("--email", required=True, help="Admin email address.")
@@ -38,9 +38,9 @@ class Command(BaseCommand):
             email=email,
             password=password,
             full_name=full_name,
-            role=User.Role.ADMIN,
+            role=User.Role.SUPERADMIN,
             is_staff=True,
         )
         self.stdout.write(
-            self.style.SUCCESS(f"Platform admin created: {user.email} (role={user.role})")
+            self.style.SUCCESS(f"Platform super admin created: {user.email} (role={user.role})")
         )

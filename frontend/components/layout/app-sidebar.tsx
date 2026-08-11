@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   Building2,
-  FileBarChart2,
   LayoutDashboard,
   Settings,
   Users,
@@ -22,7 +21,6 @@ const HOST_NAV_ITEMS = [
   { label: "Meetings", href: "/meetings", icon: Video },
   { label: "People", href: "/people", icon: Users },
   { label: "Organization", href: "/organization", icon: Building2 },
-  { label: "Reports", href: "/reports", icon: FileBarChart2 },
   { label: "Settings", href: "/settings", icon: Settings },
 ];
 
@@ -99,23 +97,6 @@ export function AppSidebar({ mobile = false, open = false, onClose }: AppSidebar
         })}
       </nav>
 
-      {!isAdmin && (
-        <div className="border-t border-border p-4">
-          <div className="rounded-xl bg-gradient-to-br from-indigo-500/10 to-violet-500/10 p-4 ring-1 ring-indigo-500/15">
-            <p className="text-sm font-semibold text-foreground">Turn conversations into action</p>
-            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-              Upload a transcript to generate your first meeting report.
-            </p>
-            <Link
-              href="/meetings/new"
-              onClick={onClose}
-              className="mt-3 inline-flex h-8 items-center rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground shadow-sm transition hover:bg-primary/90"
-            >
-              New Meeting
-            </Link>
-          </div>
-        </div>
-      )}
     </div>
   );
 

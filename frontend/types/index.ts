@@ -19,7 +19,7 @@ export interface Organization {
   open_tasks: number;
 }
 
-export type UserRole = "host" | "admin";
+export type UserRole = "host" | "admin" | "superadmin";
 
 export interface User {
   id: string;
@@ -238,6 +238,33 @@ export interface MeetingStatusInfo {
   processed_at: string | null;
 }
 
+export interface TranscriptTurn {
+  speaker: string;
+  speaker_id: string | null;
+  text: string;
+}
+
+export interface TranscriptPerson {
+  id: string;
+  full_name: string;
+  email: string;
+  department: string;
+}
+
+export interface MeetingTranscript {
+  filename: string;
+  has_speakers: boolean;
+  turns: TranscriptTurn[];
+  people: TranscriptPerson[];
+}
+
+export interface OtpRequestResult {
+  message: string;
+  account_exists: boolean;
+  expires_in?: number;
+  dev_code?: string;
+}
+
 export interface ImportResult {
   created: number;
   skipped: number;
@@ -322,3 +349,27 @@ export interface AdminDashboard {
   providers: AIProviderInfo[];
   primary: string | null;
 }
+
+export type SiteFontFamily = "default" | "system" | "serif" | "mono";
+export type SiteRadius = "0.5rem" | "0.75rem" | "1rem" | "0rem";
+
+/** Platform branding controlled by the super admin (GET is public). */
+export interface SiteTheme {
+  primary_color: string;
+  accent_color: string;
+  light_background: string;
+  dark_background: string;
+  radius: SiteRadius;
+  font_family: SiteFontFamily;
+  updated_at: string | null;
+}
+
+export const DEFAULT_SITE_THEME: SiteTheme = {
+  primary_color: "",
+  accent_color: "",
+  light_background: "",
+  dark_background: "",
+  radius: "0.75rem",
+  font_family: "default",
+  updated_at: null,
+};

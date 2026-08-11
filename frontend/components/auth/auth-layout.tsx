@@ -5,10 +5,10 @@ export function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen bg-background">
       {/* Branding panel — desktop only */}
-      <div className="relative hidden w-1/2 overflow-hidden bg-gradient-to-br from-indigo-700 via-indigo-600 to-violet-700 lg:flex lg:flex-col lg:justify-between lg:p-12">
+      <div className="relative hidden w-1/2 overflow-hidden bg-gradient-to-br from-blue-700 via-blue-600 to-sky-600 lg:flex lg:flex-col lg:justify-between lg:p-12">
         <div className="hero-grid absolute inset-0 opacity-30" aria-hidden="true" />
         <div
-          className="pointer-events-none absolute -bottom-32 -right-32 h-[420px] w-[420px] rounded-full bg-violet-400/20 blur-3xl"
+          className="pointer-events-none absolute -bottom-32 -right-32 h-[420px] w-[420px] rounded-full bg-sky-400/20 blur-3xl"
           aria-hidden="true"
         />
         <div className="relative">
@@ -19,14 +19,14 @@ export function AuthLayout({ children }: { children: React.ReactNode }) {
         </div>
 
         <div className="relative max-w-lg">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-indigo-100 backdrop-blur">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-sky-100 backdrop-blur">
             <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
             AI-powered meeting intelligence
           </div>
           <h1 className="text-4xl font-bold leading-tight tracking-tight text-white">
             Turn Every Conversation Into Action.
           </h1>
-          <p className="mt-4 text-lg leading-relaxed text-indigo-100/90">
+          <p className="mt-4 text-lg leading-relaxed text-sky-100/90">
             Summaries, decisions, tasks, and professional reports — generated from
             your meeting transcripts automatically.
           </p>
@@ -37,7 +37,7 @@ export function AuthLayout({ children }: { children: React.ReactNode }) {
               "Tasks matched to the right people with confidence",
               "Professional PDF reports in one click",
             ].map((item) => (
-              <div key={item} className="flex items-start gap-3 text-sm text-indigo-50">
+              <div key={item} className="flex items-start gap-3 text-sm text-sky-50">
                 <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/15">
                   <svg viewBox="0 0 20 20" fill="none" className="h-3 w-3" aria-hidden="true">
                     <path d="M5 10l3 3 6-7" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -49,7 +49,7 @@ export function AuthLayout({ children }: { children: React.ReactNode }) {
           </div>
         </div>
 
-        <p className="relative text-xs text-indigo-200/70">
+        <p className="relative text-xs text-sky-200/70">
           © {new Date().getFullYear()} IntelliConnect. Secure, private, enterprise-ready.
         </p>
       </div>
@@ -82,8 +82,8 @@ function LogoMark() {
     <svg viewBox="0 0 40 40" fill="none" className="h-9 w-9" aria-hidden="true">
       <defs>
         <linearGradient id="auth-grad" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#4F46E5" />
-          <stop offset="1" stopColor="#7C3AED" />
+          <stop stopColor="#2563EB" />
+          <stop offset="1" stopColor="#0EA5E9" />
         </linearGradient>
       </defs>
       <rect x="1" y="1" width="38" height="38" rx="11" fill="url(#auth-grad)" />

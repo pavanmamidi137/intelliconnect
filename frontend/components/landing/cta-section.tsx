@@ -15,14 +15,14 @@ export function CTASection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.55 }}
-          className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-indigo-600 to-violet-600 px-6 py-14 text-center shadow-[var(--shadow-glow)] sm:px-16 sm:py-20"
+          className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 via-blue-600 to-sky-600 px-6 py-14 text-center shadow-[var(--shadow-glow)] sm:px-16 sm:py-20"
         >
           <div className="hero-grid absolute inset-0 opacity-40" aria-hidden="true" />
           <div className="relative">
             <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
               Turn Every Conversation Into Action
             </h2>
-            <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-indigo-100 sm:text-lg">
+            <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-sky-100 sm:text-lg">
               AI-powered meeting intelligence for smarter conversations, clearer
               decisions, and accountable execution.
             </p>
@@ -30,7 +30,7 @@ export function CTASection() {
               <Button
                 asChild
                 size="lg"
-                className="bg-white text-indigo-700 shadow-lg hover:bg-indigo-50"
+                className="bg-white text-blue-700 shadow-lg hover:bg-blue-50"
               >
                 <Link href="/register">
                   Get Started Free

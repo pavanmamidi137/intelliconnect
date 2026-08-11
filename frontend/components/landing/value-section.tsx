@@ -74,7 +74,7 @@ export function ValueSection() {
               whileHover={{ y: -4 }}
               className="group rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition-shadow duration-300 hover:shadow-[var(--shadow-card-hover)]"
             >
-              <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500/12 to-violet-500/12 ring-1 ring-indigo-500/15 transition-transform duration-300 group-hover:scale-110">
+              <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/12 to-sky-500/12 ring-1 ring-blue-500/15 transition-transform duration-300 group-hover:scale-110">
                 <feature.icon className="h-5 w-5 text-primary" aria-hidden="true" />
               </div>
               <h3 className="text-base font-semibold text-foreground">{feature.title}</h3>

@@ -5,6 +5,8 @@ from .views import (
     AdminOrganizationsView,
     AdminUsersView,
     HostDashboardView,
+    SiteThemeResetView,
+    SiteThemeView,
 )
 
 app_name = "dashboard"
@@ -18,4 +20,7 @@ urlpatterns = [
         name="admin-organizations",
     ),
     path("dashboard/admin/users/", AdminUsersView.as_view(), name="admin-users"),
+    # Platform branding (super-admin editable, publicly readable).
+    path("settings/theme/", SiteThemeView.as_view(), name="site-theme"),
+    path("settings/theme/reset/", SiteThemeResetView.as_view(), name="site-theme-reset"),
 ]

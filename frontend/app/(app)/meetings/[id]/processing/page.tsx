@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -39,10 +39,28 @@ export default function ProcessingPage() {
   const [statusInfo, setStatusInfo] = useState<MeetingStatusInfo | null>(null);
   const [failed, setFailed] = useState(false);
   const [retrying, setRetrying] = useState(false);
+  const startedRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
     let timer: ReturnType<typeof setTimeout> | null = null;
+
+    // If the meeting is still a draft, kick off the analysis once (covers
+    // direct navigation to this screen, and any race with the async start
+    // that fires on creation). Meetings without a transcript redirect to
+    // the detail page, which explains how to add one.
+    const startIfNeeded = async (info: MeetingStatusInfo) => {
+      if (startedRef.current || info.status !== "draft") return;
+      startedRef.current = true;
+      try {
+        await meetingsService.process(id);
+      } catch {
+        if (!cancelled) {
+          toast.error("Add a transcript before starting the analysis.");
+          router.replace(`/meetings/${id}`);
+        }
+      }
+    };
 
     // Poll the lightweight status endpoint — the full meeting payload is
     // heavy (task candidates, participant links), so polling it every
@@ -52,6 +70,7 @@ export default function ProcessingPage() {
         const info = await meetingsService.status(id);
         if (cancelled) return;
         setStatusInfo(info);
+        await startIfNeeded(info);
         if (info.status === "review_required") {
           toast.success("Meeting analyzed successfully. Review the results below.");
           router.replace(`/meetings/${id}/review`);
@@ -106,7 +125,7 @@ export default function ProcessingPage() {
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.4 }}
-          className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-indigo-600 to-violet-600 shadow-[var(--shadow-glow)]"
+          className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-blue-600 to-sky-500 shadow-[var(--shadow-glow)]"
         >
           {failed ? (
             <AlertTriangle className="h-9 w-9 text-white" aria-hidden="true" />

@@ -92,10 +92,10 @@ export function PowerBIContainer({
       <Card className="relative flex min-h-[420px] flex-col items-center justify-center overflow-hidden px-6 py-16 text-center">
         <div className="hero-grid absolute inset-0 opacity-60" aria-hidden="true" />
         <div
-          className="pointer-events-none absolute -top-24 left-1/2 h-64 w-[480px] -translate-x-1/2 rounded-full bg-indigo-500/10 blur-3xl"
+          className="pointer-events-none absolute -top-24 left-1/2 h-64 w-[480px] -translate-x-1/2 rounded-full bg-blue-500/10 blur-3xl"
           aria-hidden="true"
         />
-        <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500/15 to-violet-500/15 ring-1 ring-indigo-500/25">
+        <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500/15 to-sky-500/15 ring-1 ring-blue-500/25">
           <BarChart3 className="h-8 w-8 text-primary" aria-hidden="true" />
         </div>
         <h2 className="relative mt-5 text-xl font-bold tracking-tight text-foreground sm:text-2xl">

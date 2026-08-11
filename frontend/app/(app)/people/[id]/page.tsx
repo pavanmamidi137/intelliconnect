@@ -143,7 +143,7 @@ export default function PersonProfilePage() {
       <div className="grid gap-4 sm:grid-cols-3">
         <Card>
           <CardContent className="flex items-center gap-3 p-5">
-            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-500/10 text-primary">
+            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10 text-primary">
               <Video className="h-5 w-5" aria-hidden="true" />
             </span>
             <div>

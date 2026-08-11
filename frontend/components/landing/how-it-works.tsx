@@ -58,7 +58,7 @@ export function HowItWorks() {
         {/* Desktop horizontal timeline */}
         <div className="relative mt-16 hidden lg:block">
           <div
-            className="absolute left-0 right-0 top-6 h-px bg-gradient-to-r from-indigo-500/40 via-violet-500/40 to-indigo-500/40"
+            className="absolute left-0 right-0 top-6 h-px bg-gradient-to-r from-blue-500/40 via-sky-500/40 to-blue-500/40"
             aria-hidden="true"
           />
           <div className="grid grid-cols-4 gap-8">
@@ -71,7 +71,7 @@ export function HowItWorks() {
                 transition={{ duration: 0.5, delay: 0.1 * index }}
                 className="relative"
               >
-                <div className="relative z-10 mb-5 inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-indigo-500/25 bg-background shadow-[var(--shadow-card)]">
+                <div className="relative z-10 mb-5 inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-blue-500/25 bg-background shadow-[var(--shadow-card)]">
                   <step.icon className="h-5 w-5 text-primary" aria-hidden="true" />
                 </div>
                 <div className="text-xs font-bold uppercase tracking-widest text-violet">
@@ -89,7 +89,7 @@ export function HowItWorks() {
         {/* Mobile/tablet vertical timeline */}
         <div className="relative mt-12 space-y-8 lg:hidden">
           <div
-            className="absolute bottom-4 left-6 top-4 w-px bg-gradient-to-b from-indigo-500/40 to-violet-500/40"
+            className="absolute bottom-4 left-6 top-4 w-px bg-gradient-to-b from-blue-500/40 to-sky-500/40"
             aria-hidden="true"
           />
           {STEPS.map((step, index) => (
@@ -101,7 +101,7 @@ export function HowItWorks() {
               transition={{ duration: 0.45, delay: 0.06 * index }}
               className="relative flex gap-5"
             >
-              <div className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-indigo-500/25 bg-background shadow-[var(--shadow-card)]">
+              <div className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-blue-500/25 bg-background shadow-[var(--shadow-card)]">
                 <step.icon className="h-5 w-5 text-primary" aria-hidden="true" />
               </div>
               <div>

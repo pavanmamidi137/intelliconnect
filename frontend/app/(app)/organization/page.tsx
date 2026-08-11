@@ -147,7 +147,7 @@ export default function OrganizationPage() {
           ) : (
             <>
               <div className="flex items-start gap-4">
-                <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500/15 to-violet-500/15 ring-1 ring-indigo-500/20">
+                <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500/15 to-sky-500/15 ring-1 ring-blue-500/20">
                   <Building2 className="h-7 w-7 text-primary" aria-hidden="true" />
                 </span>
                 <div>
@@ -206,8 +206,8 @@ export default function OrganizationPage() {
 }
 
 const TINTS = {
-  indigo: "from-indigo-500/10 to-indigo-500/5 text-primary ring-indigo-500/20",
-  violet: "from-violet-500/10 to-violet-500/5 text-violet ring-violet-500/20",
+  indigo: "from-blue-500/10 to-blue-500/5 text-primary ring-blue-500/20",
+  violet: "from-sky-500/10 to-sky-500/5 text-violet ring-sky-500/20",
   emerald: "from-emerald-500/10 to-emerald-500/5 text-success ring-emerald-500/20",
   amber: "from-amber-500/10 to-amber-500/5 text-warning ring-amber-500/20",
 } as const;

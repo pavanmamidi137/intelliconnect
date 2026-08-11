@@ -84,8 +84,12 @@ meeting transcript, review the AI output, and generate the PDF report.
 
 ```
 Landing → Register → Add People → Create Meeting → Upload Transcript
-→ AI Analysis → Person Matching → Review & Confirm → PDF Report → Reports
+(or paste it) → AI Analysis → Person Matching → Review & Confirm → PDF Report → Reports
 ```
+
+Meetings accept a transcript **file** (TXT/PDF/DOCX/SRT/VTT), **pasted
+transcript text** (stored as a TXT transcript), audio, or none of the above
+(draft). Creating a meeting with a transcript starts analysis immediately.
 
 Key product rules:
 
@@ -103,17 +107,23 @@ Key product rules:
 ## Roles & dashboards
 
 Every account has a role: **host** (created through registration, manages
-one organization) or **admin** (platform-level app management).
+one organization) or **superadmin** (platform-level app management;
+`admin` is accepted as a legacy alias).
 
 - **Host dashboard** — `/dashboard`. Scoped to the signed-in host's own
-  organization: real meeting/task/people/report stats, recent meetings and
-  open tasks, plus the Power BI embed container. Every host sees their own
-  data; the backend filters every query by organization.
+  organization: real meeting/task/people/report stats plus recent meetings
+  and open tasks. Every host sees their own data; the backend filters every
+  query by organization.
 - **Admin dashboard** — `/admin`. Platform-wide app management: totals
   across organizations, users, people, meetings, tasks, and reports,
   meetings/tasks by status, AI provider status, and searchable management
-  tables for organizations and users. Requires the `admin` role;
+  tables for organizations and users. Requires the `superadmin` role;
   cross-role access redirects automatically.
+- **Brand & Design** (Settings → superadmin only) — change the platform
+  theme color, accent, light/dark backgrounds, corner radius and body font.
+  Saved themes apply instantly to every user via CSS variables and the
+  browser-tab icon follows the brand. GET `/api/settings/theme/` is public;
+  PUT/reset require the super-admin role.
 
 Create a platform admin with:
 
@@ -127,14 +137,17 @@ cd backend
 
 ```
 POST /api/auth/register/          POST /api/auth/login/
+POST /api/auth/otp/request/       POST /api/auth/otp/verify/   (passwordless login)
 POST /api/auth/logout/            POST /api/auth/refresh/
 GET|PATCH /api/profile/           POST /api/profile/password/
 GET|PATCH /api/organization/
 GET|POST /api/people/             GET|PATCH|DELETE /api/people/<id>/
 POST /api/people/import/          GET /api/people/facets/
 GET|POST /api/meetings/           GET|PATCH|DELETE /api/meetings/<id>/
-POST /api/meetings/<id>/process/  GET /api/meetings/<id>/review/
+POST /api/meetings/<id>/process/  GET /api/meetings/<id>/status/
+GET /api/meetings/<id>/review/    GET /api/meetings/<id>/transcript/
 POST /api/meetings/<id>/generate-report/
+GET /api/settings/theme/          PUT /api/settings/theme/   (superadmin)
 GET|POST /api/tasks/              GET|PATCH|DELETE /api/tasks/<id>/
 GET /api/reports/                 GET /api/reports/<id>/download/
 ```
@@ -202,6 +215,12 @@ Steps:
 
 Notes:
 
+- **Load balancing & throughput.** Render's load balancer fronts the API
+  service; gunicorn serves each worker process as an independent request
+  handler. The start command honors `WEB_CONCURRENCY` (Render sets it from
+  the instance size — raise it, or move to a paid plan, to scale request
+  throughput). The database uses a pooled connection (`conn_max_age=600`)
+  so workers share connections safely.
 - Background AI/PDF jobs run in-process threads when no broker is
   configured (they do not block requests). For higher throughput, add a
   Render Redis instance and set `CELERY_BROKER_URL` / `CELERY_RESULT_BACKEND`.

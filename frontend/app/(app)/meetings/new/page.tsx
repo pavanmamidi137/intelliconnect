@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ArrowLeft, CalendarDays, CheckCircle2, FileText, Music, Rocket, Users } from "lucide-react";
+import { ArrowLeft, CalendarDays, CheckCircle2, ClipboardPaste, FileText, Music, Rocket, Users } from "lucide-react";
 import { toast } from "sonner";
 
 import { UploadDropzone } from "@/components/meetings/upload-dropzone";
@@ -38,6 +38,7 @@ type MeetingValues = z.infer<typeof meetingSchema>;
 export default function NewMeetingPage() {
   const router = useRouter();
   const [transcript, setTranscript] = useState<File | null>(null);
+  const [transcriptText, setTranscriptText] = useState("");
   const [audio, setAudio] = useState<File | null>(null);
   const [participantIds, setParticipantIds] = useState<string[]>([]);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -67,6 +68,17 @@ export default function NewMeetingPage() {
     );
   };
 
+  const allSelected = people.length > 0 && participantIds.length === people.length;
+  const selectAll = () => {
+    if (allSelected) {
+      setParticipantIds([]);
+    } else {
+      setParticipantIds(people.map((p) => p.id));
+    }
+  };
+
+  const hasTranscript = Boolean(transcript) || transcriptText.trim().length > 0;
+
   const values = watch();
   const preview = {
     title: values.title || "Untitled meeting",
@@ -92,12 +104,13 @@ export default function NewMeetingPage() {
           notes: values.notes ?? "",
           participant_ids: participantIds,
           transcript,
+          transcript_text: transcriptText.trim() || undefined,
           audio,
         },
         setUploadProgress
       );
       setPhase("success");
-      if (transcript) {
+      if (hasTranscript) {
         toast.success("Meeting created. Starting AI analysis…");
         setTimeout(() => router.push(`/meetings/${meeting.id}/processing`), 1200);
       } else {
@@ -203,10 +216,45 @@ export default function NewMeetingPage() {
               file={transcript}
               onFileChange={(f) => {
                 setTranscript(f);
+                setTranscriptText("");
                 setError(null);
               }}
               onError={handleFileError}
             />
+
+            <div className="relative">
+              <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 border-t border-dashed border-border" aria-hidden="true" />
+              <span className="relative z-10 mx-auto flex w-fit items-center gap-2 bg-background px-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                <ClipboardPaste className="h-3.5 w-3.5" aria-hidden="true" /> or paste your transcript
+              </span>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="transcript_text">Paste Transcript Text</Label>
+              <Textarea
+                id="transcript_text"
+                value={transcriptText}
+                onChange={(e) => {
+                  setTranscriptText(e.target.value);
+                  if (e.target.value.trim()) {
+                    setTranscript(null);
+                  }
+                  setError(null);
+                }}
+                placeholder={"Paste your meeting transcript here — with or without speaker names…\n\nPriya: Good morning, let's start.\nRavi: I'll walk everyone through the sprint status."}
+                className="min-h-[140px] font-mono text-sm leading-relaxed"
+                disabled={Boolean(transcript)}
+              />
+              <p className="text-xs text-muted-foreground">
+                Pasted text is stored as a TXT transcript and analyzed exactly like an uploaded file.
+                {transcriptText.length > 0 && (
+                  <span className="ml-1 text-muted-foreground">
+                    {transcriptText.length.toLocaleString()} characters
+                  </span>
+                )}
+              </p>
+            </div>
+
             <UploadDropzone
               id="audio"
               label="Audio Recording (optional)"
@@ -218,9 +266,9 @@ export default function NewMeetingPage() {
               onError={handleFileError}
             />
             <p className="text-xs leading-relaxed text-muted-foreground">
-              Attach a transcript (TXT, PDF, DOCX, SRT, or VTT) to run AI analysis — or create the
-              meeting now and add one later. Audio recordings are stored securely but aren&apos;t
-              transcribed automatically.
+              Upload a transcript file <em>or</em> paste the transcript text to run AI analysis —
+              or create the meeting now and add one later. Audio recordings are stored securely but
+              aren&apos;t transcribed automatically.
             </p>
             {error && <p className="text-sm text-danger">{error}</p>}
           </CardContent>
@@ -228,11 +276,21 @@ export default function NewMeetingPage() {
 
         {/* Participants */}
         <Card>
-          <CardHeader>
+          <CardHeader className="flex-row items-center justify-between space-y-0">
             <CardTitle className="flex items-center gap-2">
               <Users className="h-4 w-4 text-primary" aria-hidden="true" /> Participants
               <span className="text-sm font-normal text-muted-foreground">({participantIds.length} selected)</span>
             </CardTitle>
+            {people.length > 0 && (
+              <button
+                type="button"
+                onClick={selectAll}
+                className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-primary transition hover:bg-accent/60 hover:underline"
+              >
+                <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
+                {allSelected ? "Clear all" : "Select all"}
+              </button>
+            )}
           </CardHeader>
           <CardContent>
             {peopleQuery.isLoading ? (
@@ -305,7 +363,11 @@ export default function NewMeetingPage() {
               <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
                 <span className="inline-flex items-center gap-1.5">
                   <FileText className="h-3.5 w-3.5" aria-hidden="true" />
-                  {transcript ? transcript.name : "No transcript selected"}
+                  {transcript
+                    ? transcript.name
+                    : transcriptText.trim()
+                      ? `Pasted transcript (${transcriptText.trim().length.toLocaleString()} chars)`
+                      : "No transcript selected"}
                 </span>
                 {audio && (
                   <span className="inline-flex items-center gap-1.5">
@@ -322,7 +384,7 @@ export default function NewMeetingPage() {
               <div className="space-y-2">
                 <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 transition-all duration-300"
+                    className="h-full rounded-full bg-gradient-to-r from-blue-600 to-sky-500 transition-all duration-300"
                     style={{ width: `${uploadProgress}%` }}
                   />
                 </div>
@@ -332,7 +394,7 @@ export default function NewMeetingPage() {
               </div>
             ) : (
               <Button type="submit" variant="gradient" size="lg" className="w-full">
-                {transcript ? "Create Meeting & Start Analysis" : "Create Meeting"}
+                {hasTranscript ? "Create Meeting & Start Analysis" : "Create Meeting"}
               </Button>
             )}
           </CardContent>
@@ -344,7 +406,7 @@ export default function NewMeetingPage() {
 
 function SuccessIcon() {
   return (
-    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500/15 to-violet-500/15 ring-1 ring-indigo-500/25">
+    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500/15 to-sky-500/15 ring-1 ring-blue-500/25">
       <CheckCircle2 className="h-8 w-8 text-success" aria-hidden="true" />
     </div>
   );

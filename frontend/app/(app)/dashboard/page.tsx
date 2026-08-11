@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 
 import { MeetingStatusBadge } from "@/components/meetings/status-badge";
-import { PowerBIContainer } from "@/components/powerbi/power-bi-container";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
 import { PageHeader } from "@/components/shared/page-header";
@@ -66,7 +65,7 @@ function StatCard({
   return (
     <Card className="transition-shadow hover:shadow-[var(--shadow-card-hover)]">
       <CardContent className="flex items-start gap-4 p-5">
-        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500/15 to-violet-500/15 ring-1 ring-indigo-500/20`}>
+        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/15 to-sky-500/15 ring-1 ring-blue-500/20`}>
           <Icon className={`h-5 w-5 ${accent}`} aria-hidden="true" />
         </div>
         <div className="min-w-0">
@@ -148,7 +147,6 @@ export default function HostDashboardPage() {
               </Button>
             }
           />
-          <PowerBIContainer />
         </div>
       )}
 
@@ -255,7 +253,7 @@ export default function HostDashboardPage() {
                       href={`/meetings/${meeting.id}`}
                       className="flex items-center gap-4 rounded-lg border border-border/70 bg-card/50 p-3.5 transition hover:border-primary/40 hover:bg-accent/40"
                     >
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500/15 to-violet-500/15">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500/15 to-sky-500/15">
                         <Video className="h-4.5 w-4.5 text-primary" aria-hidden="true" />
                       </div>
                       <div className="min-w-0 flex-1">
@@ -316,9 +314,6 @@ export default function HostDashboardPage() {
               </CardContent>
             </Card>
           )}
-
-          {/* Power BI embedded analytics — the dashboard's intelligence layer. */}
-          <PowerBIContainer title="Your Intelligence Dashboard" subtitle="Power BI analytics will appear here." />
         </>
       )}
     </div>

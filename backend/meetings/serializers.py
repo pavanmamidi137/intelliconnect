@@ -74,13 +74,18 @@ class MeetingCreateSerializer(serializers.ModelSerializer):
     # draft without files, or with a transcript and/or audio recording.
     # AI analysis needs a transcript; the process endpoint enforces that.
     transcript = serializers.FileField(required=False, write_only=True)
+    # Paste-in transcript text — stored as a TXT transcript so pasted
+    # meetings are analyzed exactly like file uploads.
+    transcript_text = serializers.CharField(
+        required=False, write_only=True, allow_blank=True, trim_whitespace=False
+    )
     audio = serializers.FileField(required=False, write_only=True)
 
     class Meta:
         model = Meeting
         fields = [
             "id", "title", "meeting_date", "meeting_type", "notes",
-            "participant_ids", "transcript", "audio",
+            "participant_ids", "transcript", "transcript_text", "audio",
         ]
 
     def validate_title(self, value):
@@ -128,10 +133,27 @@ class MeetingCreateSerializer(serializers.ModelSerializer):
             )
         return list(people.values_list("id", flat=True))
 
+    def validate_transcript_text(self, value):
+        value = value or ""
+        if len(value) > 200_000:
+            raise serializers.ValidationError(
+                "Pasted transcript is too long — keep it under 200,000 characters."
+            )
+        return value
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        if attrs.get("transcript") is not None and attrs.get("transcript_text", "").strip():
+            raise serializers.ValidationError(
+                {"transcript_text": "Upload a transcript file OR paste text — not both."}
+            )
+        return attrs
+
     def create(self, validated_data):
         request = self.context["request"]
         participant_ids = validated_data.pop("participant_ids", [])
         transcript_file = validated_data.pop("transcript", None)
+        transcript_text = validated_data.pop("transcript_text", "") or ""
         audio_file = validated_data.pop("audio", None)
 
         meeting = Meeting.objects.create(
@@ -150,6 +172,15 @@ class MeetingCreateSerializer(serializers.ModelSerializer):
                     transcript_file.read(),
                 )
                 meeting.transcript_filename = transcript_file.name
+            elif transcript_text.strip():
+                # Pasted text is stored as a real TXT transcript so the rest
+                # of the pipeline (analysis, transcript view, PDF) works
+                # exactly as it does for uploaded files.
+                meeting.transcript_path = storage.save(
+                    meeting_transcript_path(request.user.organization_id, meeting.id, "transcript.txt"),
+                    transcript_text.encode("utf-8"),
+                )
+                meeting.transcript_filename = "transcript.txt"
             if audio_file:
                 meeting.audio_path = storage.save(
                     meeting_audio_path(request.user.organization_id, meeting.id, audio_file.name),

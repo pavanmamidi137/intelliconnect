@@ -1,13 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import {
   AlertTriangle,
   ArrowLeft,
   CalendarDays,
+  Check,
   CheckCircle2,
+  ChevronDown,
+  Copy,
   Download,
   Eye,
   FileDown,
@@ -50,6 +53,50 @@ export default function MeetingDetailPage() {
     queryKey: ["meeting", id],
     queryFn: () => meetingsService.get(id),
   });
+
+  // Transcript with speaker turns + matched people (only fetched when the
+  // meeting actually has a transcript file).
+  const hasTranscript = Boolean(query.data?.transcript_name);
+  const transcriptQuery = useQuery({
+    queryKey: ["meeting-transcript", id],
+    queryFn: () => meetingsService.transcript(id),
+    enabled: hasTranscript,
+  });
+
+  const [transcriptExpanded, setTranscriptExpanded] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const speakerColors = useMemo(
+    () => ["bg-blue-500", "bg-sky-500", "bg-cyan-500", "bg-teal-500", "bg-indigo-500", "bg-violet-500", "bg-blue-600"],
+    []
+  );
+
+  const speakerColorFor = (speaker: string) => {
+    const seen = new Map<string, number>();
+    let index = 0;
+    for (const turn of transcriptQuery.data?.turns ?? []) {
+      if (turn.speaker && !seen.has(turn.speaker)) {
+        seen.set(turn.speaker, index);
+        index += 1;
+      }
+    }
+    return speakerColors[(seen.get(speaker) ?? 0) % speakerColors.length];
+  };
+
+  const copyTranscript = async () => {
+    if (!transcriptQuery.data) return;
+    try {
+      await navigator.clipboard.writeText(
+        transcriptQuery.data.turns
+          .map((turn) => (turn.speaker ? `${turn.speaker}: ${turn.text}` : turn.text))
+          .join("\n")
+      );
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard unavailable — silently ignore.
+    }
+  };
 
   if (query.isLoading) {
     return (
@@ -249,6 +296,99 @@ export default function MeetingDetailPage() {
               )}
             </CardContent>
           </Card>
+
+          {/* Transcript with speakers */}
+          {hasTranscript && (
+            <Card>
+              <CardHeader className="flex-row items-center justify-between space-y-0">
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-primary" aria-hidden="true" /> Transcript
+                </CardTitle>
+                <div className="flex items-center gap-2">
+                  <Button variant="ghost" size="sm" onClick={copyTranscript} className="h-8 px-2.5 text-xs">
+                    {copied ? <Check className="h-3.5 w-3.5 text-success" aria-hidden="true" /> : <Copy className="h-3.5 w-3.5" aria-hidden="true" />}
+                    {copied ? "Copied" : "Copy"}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setTranscriptExpanded((v) => !v)}
+                    className="h-8 px-2.5 text-xs"
+                    aria-expanded={transcriptExpanded}
+                  >
+                    {transcriptExpanded ? "Collapse" : "Expand"}
+                    <ChevronDown className={`h-3.5 w-3.5 transition-transform ${transcriptExpanded ? "rotate-180" : ""}`} aria-hidden="true" />
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {transcriptQuery.isLoading && (
+                  <div className="flex items-center gap-2 py-4 text-sm text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> Loading transcript…
+                  </div>
+                )}
+                {transcriptQuery.isError && (
+                  <p className="py-2 text-sm text-danger">
+                    {(transcriptQuery.error as Error).message || "Couldn't load the transcript."}
+                  </p>
+                )}
+                {transcriptQuery.data && (
+                  <>
+                    {transcriptQuery.data.people.length > 0 && (
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">People in this transcript:</span>
+                        {transcriptQuery.data.people.map((person) => (
+                          <button
+                            key={person.id}
+                            type="button"
+                            onClick={() => router.push(`/people/${person.id}`)}
+                            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/40 py-1 pl-1 pr-3 text-xs font-medium text-foreground transition hover:bg-accent"
+                          >
+                            <Avatar className="h-5 w-5">
+                              <AvatarFallback className="text-[8px]">{initials(person.full_name)}</AvatarFallback>
+                            </Avatar>
+                            {person.full_name}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    <div
+                      className={`relative overflow-hidden rounded-xl border border-border bg-muted/20 ${transcriptExpanded ? "" : "max-h-80"}`}
+                    >
+                      <div className="max-h-[26rem] space-y-3 overflow-y-auto p-4">
+                        {transcriptQuery.data.turns.map((turn, index) => (
+                          <div key={index} className="flex items-start gap-2.5">
+                            {transcriptQuery.data.has_speakers ? (
+                              <>
+                                <span
+                                  className={`mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[9px] font-bold text-white ${speakerColorFor(turn.speaker)}`}
+                                  aria-hidden="true"
+                                >
+                                  {initials(turn.speaker || "?")}
+                                </span>
+                                <div className="min-w-0">
+                                  <p className="text-xs font-semibold text-foreground">{turn.speaker || "Speaker"}</p>
+                                  <p className="mt-0.5 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">{turn.text}</p>
+                                </div>
+                              </>
+                            ) : (
+                              <p className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground">{turn.text}</p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                      {!transcriptExpanded && (
+                        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-card to-transparent" aria-hidden="true" />
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {transcriptQuery.data.filename} · {transcriptQuery.data.turns.length} speaker turn{transcriptQuery.data.turns.length === 1 ? "" : "s"}
+                    </p>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           {/* Key points + decisions */}
           <div className="grid gap-6 sm:grid-cols-2">

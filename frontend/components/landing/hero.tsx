@@ -31,7 +31,7 @@ export function Hero() {
       {/* background decoration */}
       <div className="hero-grid absolute inset-0" aria-hidden="true" />
       <div
-        className="pointer-events-none absolute -top-40 left-1/2 h-[480px] w-[820px] -translate-x-1/2 rounded-full bg-gradient-to-r from-indigo-500/20 to-violet-500/20 blur-3xl"
+        className="pointer-events-none absolute -top-40 left-1/2 h-[480px] w-[820px] -translate-x-1/2 rounded-full bg-gradient-to-r from-blue-500/20 to-sky-500/20 blur-3xl"
         aria-hidden="true"
       />
 
@@ -103,7 +103,7 @@ export function Hero() {
           className="relative mx-auto mt-16 max-w-5xl sm:mt-20"
         >
           <div
-            className="absolute -inset-4 rounded-3xl bg-gradient-to-r from-indigo-500/15 to-violet-500/15 blur-2xl"
+            className="absolute -inset-4 rounded-3xl bg-gradient-to-r from-blue-500/15 to-sky-500/15 blur-2xl"
             aria-hidden="true"
           />
           <div className="relative overflow-hidden rounded-2xl border border-border bg-card shadow-2xl">
@@ -124,7 +124,7 @@ export function Hero() {
                 <div className="rounded-xl border border-border bg-background p-5">
                   <div className="mb-3 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500/10 text-primary">
+                      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10 text-primary">
                         <FileText className="h-4 w-4" aria-hidden="true" />
                       </span>
                       <div>

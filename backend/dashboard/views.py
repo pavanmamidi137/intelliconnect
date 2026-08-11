@@ -13,10 +13,11 @@ Two audiences:
 """
 
 from django.contrib.auth import get_user_model
+from django.core.validators import RegexValidator
 from django.db.models import Count, Q
 from django.utils import timezone
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -29,6 +30,7 @@ from people.models import Person
 from reports.models import MeetingReport
 from tasks.models import Task
 
+from .models import SiteTheme
 from .permissions import IsPlatformAdmin
 from .serializers import (
     AdminOrganizationListSerializer,
@@ -213,3 +215,83 @@ class AdminUsersView(APIView):
         return paginator.get_paginated_response(
             AdminUserListSerializer(page, many=True).data
         )
+
+
+HEX_COLOR = RegexValidator(
+    regex=r"^#[0-9a-fA-F]{6}$",
+    message="Enter a hex color like #2563eb.",
+    code="invalid_hex",
+)
+
+
+class SiteThemeView(APIView):
+    """Platform branding/theme.
+
+    GET is public — the frontend applies the theme (even on the login page)
+    before the user authenticates. PUT requires the super-admin role.
+    """
+
+    def get_permissions(self):
+        if self.request.method == "GET":
+            return [AllowAny()]
+        return [IsPlatformAdmin()]
+
+    def get(self, request):
+        return Response(SiteTheme.get_singleton().as_payload())
+
+    def put(self, request):
+        theme = SiteTheme.get_singleton()
+        data = request.data or {}
+
+        errors = {}
+        for field in (
+            "primary_color", "accent_color", "light_background", "dark_background"
+        ):
+            value = str(data.get(field, "")).strip()
+            if value:
+                validator = HEX_COLOR
+                try:
+                    validator(value)
+                except Exception:
+                    errors[field] = "Enter a hex color like #2563eb."
+
+        radius = str(data.get("radius", theme.radius))
+        if radius not in dict(SiteTheme.RADIUS_CHOICES):
+            errors["radius"] = "Pick a valid corner radius."
+        font_family = str(data.get("font_family", theme.font_family))
+        if font_family not in dict(SiteTheme.FONT_CHOICES):
+            errors["font_family"] = "Pick a valid font family."
+        if errors:
+            return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+
+        theme.primary_color = str(data.get("primary_color", theme.primary_color)).strip()
+        theme.accent_color = str(data.get("accent_color", theme.accent_color)).strip()
+        theme.light_background = str(
+            data.get("light_background", theme.light_background)
+        ).strip()
+        theme.dark_background = str(
+            data.get("dark_background", theme.dark_background)
+        ).strip()
+        theme.radius = radius
+        theme.font_family = font_family
+        theme.updated_by = request.user
+        theme.save()
+        return Response(theme.as_payload())
+
+
+class SiteThemeResetView(APIView):
+    """Reset branding back to the default design system (super admin only)."""
+
+    permission_classes = [IsPlatformAdmin]
+
+    def post(self, request):
+        theme = SiteTheme.get_singleton()
+        theme.primary_color = ""
+        theme.accent_color = ""
+        theme.light_background = ""
+        theme.dark_background = ""
+        theme.radius = "0.75rem"
+        theme.font_family = "default"
+        theme.updated_by = request.user
+        theme.save()
+        return Response(theme.as_payload())

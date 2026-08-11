@@ -123,6 +123,11 @@ class MeetingViewSet(
         )
         serializer.is_valid(raise_exception=True)
         meeting = serializer.save()
+        # Meetings created with a transcript (uploaded or pasted) start
+        # analysis immediately — the UI routes straight to the processing
+        # screen, which would otherwise poll a draft forever.
+        if meeting.transcript_path:
+            dispatch_async(analyze_meeting_job, meeting.id)
         return Response(
             MeetingDetailSerializer(meeting, context={"request": request}).data,
             status=status.HTTP_201_CREATED,
@@ -279,6 +284,9 @@ class MeetingGenerateReportView(APIView):
                 status=status.HTTP_202_ACCEPTED,
             )
 
+        # generate_report saved pdf_path on its own instance — refresh so the
+        # serialized response reflects the freshly stored PDF.
+        meeting.refresh_from_db()
         return Response(
             {
                 "detail": "Report generated successfully.",
@@ -362,6 +370,67 @@ class MeetingGenerateReportView(APIView):
                 payload["meeting"] = meeting
                 payload["mentioned_name"] = str(item.get("mentioned_name", "")).strip()
                 Task.objects.create(source=Task.Source.MANUAL, **payload)
+
+
+class MeetingTranscriptView(APIView):
+    """Return the meeting's transcript text split into speaker turns,
+    with speakers matched against the organization's people roster."""
+
+    def get(self, request, id):
+        meeting = MeetingProcessView()._get_meeting(request, id)
+        if not meeting.transcript_path:
+            raise NotFoundError("This meeting has no transcript.")
+
+        storage = get_storage()
+        try:
+            raw = storage.read(meeting.transcript_path)
+        except StorageError:
+            raise NotFoundError("The transcript file couldn't be read.")
+
+        from people.models import Person
+        from .transcripts import extract_transcript_text, normalize_name, parse_transcript_turns
+
+        content = extract_transcript_text(meeting.transcript_filename or "transcript.txt", raw)
+        turns, has_speakers = parse_transcript_turns(content)
+
+        # Build a lookup of normalized name -> person (full name + username).
+        people = Person.objects.filter(organization=meeting.organization)
+        lookup = {}
+        for person in people:
+            for key in (person.full_name, person.user_name):
+                normalized = normalize_name(key) if key else ""
+                if normalized and normalized not in lookup:
+                    lookup[normalized] = person
+
+        matched = {}
+        resolved_turns = []
+        for turn in turns:
+            speaker_id = None
+            if turn["speaker"]:
+                person = lookup.get(normalize_name(turn["speaker"]))
+                if person is not None:
+                    speaker_id = str(person.id)
+                    matched[str(person.id)] = person
+            resolved_turns.append(
+                {"speaker": turn["speaker"], "speaker_id": speaker_id, "text": turn["text"]}
+            )
+
+        return Response(
+            {
+                "filename": meeting.transcript_filename,
+                "has_speakers": has_speakers,
+                "turns": resolved_turns,
+                "people": [
+                    {
+                        "id": str(p.id),
+                        "full_name": p.full_name,
+                        "email": p.email,
+                        "department": p.department,
+                    }
+                    for p in matched.values()
+                ],
+            }
+        )
 
 
 class MeetingPdfView(APIView):
