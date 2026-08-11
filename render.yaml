@@ -1,0 +1,71 @@
+# Render blueprint for IntelliConnect.
+#
+# Two services:
+#   1. intelliconnect-api  — Django REST API (Postgres via Supabase)
+#   2. intelliconnect-web  — Next.js frontend
+#
+# Values marked `sync: false` hold secrets or deploy-specific values and
+# must be filled in the Render dashboard (Service → Environment). The
+# public variables below default to the blueprint's own *.onrender.com
+# URLs, which are assigned from the service names — adjust them if you
+# rename a service or attach a custom domain.
+#
+# Secrets that MUST be set in the dashboard:
+#   API:   SECRET_KEY, DATABASE_URL, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY,
+#          GEMINI_API_KEY (or your AI provider keys)
+#   WEB:   (none — NEXT_PUBLIC_* are build-time public values)
+
+services:
+  - type: web
+    name: intelliconnect-api
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: python manage.py collectstatic --noinput && python manage.py migrate --noinput && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 180
+    healthCheckPath: /api/health/
+    envVars:
+      - key: SECRET_KEY
+        sync: false
+      - key: DEBUG
+        value: "false"
+      - key: ALLOWED_HOSTS
+        value: "*"
+      - key: FRONTEND_ORIGINS
+        value: https://intelliconnect-web.onrender.com
+      - key: DATABASE_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPABASE_STORAGE_BUCKET
+        value: meeting-files
+      - key: STORAGE_BACKEND
+        value: supabase
+      - key: AI_PRIMARY_PROVIDER
+        value: gemini
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-flash-latest
+      - key: GEMINI_THINKING_BUDGET
+        value: "256"
+      - key: AI_CONFIDENCE_THRESHOLD
+        value: "0.75"
+
+  - type: web
+    name: intelliconnect-web
+    runtime: node
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_OPTIONS
+        value: "--max-old-space-size=2048"
+      - key: NEXT_PUBLIC_API_URL
+        value: https://intelliconnect-api.onrender.com/api
+      - key: NEXT_PUBLIC_APP_NAME
+        value: IntelliConnect

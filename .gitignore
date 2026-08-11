@@ -1,0 +1,40 @@
+# ── Secrets & environment ─────────────────────────────────────────────
+.env
+.env.local
+.env*.local
+.env.*.local
+!.env.example
+
+# ── Node / Next.js ─────────────────────────────────────────────────────
+node_modules/
+.next/
+out/
+next-env.d.ts
+
+# ── Python / Django ────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.sqlite3
+db.sqlite3
+media/
+staticfiles/
+
+# ── Build & logs ───────────────────────────────────────────────────────
+dist/
+build/
+*.log
+logs/
+
+# ── Freebuff workspace (local app data — never commit) ─────────────────
+.freebuff/
+
+# ── OS / editor ────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# TypeScript incremental build cache
+*.tsbuildinfo
