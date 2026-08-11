@@ -22,7 +22,6 @@ interface AuthContextValue {
   isAuthenticated: boolean;
   isAdmin: boolean;
   login: (email: string, password: string) => Promise<User>;
-  loginWithOtp: (email: string, code: string) => Promise<User>;
   register: (payload: RegisterPayload) => Promise<User>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -103,14 +102,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return response.user;
   }, []);
 
-  const loginWithOtp = useCallback(async (email: string, code: string) => {
-    const response = await authService.verifyOtp(email, code);
-    api.setTokens(response.access, response.refresh);
-    writeUserCache(response.user);
-    setUser(response.user);
-    return response.user;
-  }, []);
-
   const register = useCallback(async (payload: RegisterPayload) => {
     const response = await authService.register(payload);
     api.setTokens(response.access, response.refresh);
@@ -146,12 +137,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // the superadmin role existed.
       isAdmin: user?.role === "superadmin" || user?.role === "admin",
       login,
-      loginWithOtp,
       register,
       logout,
       refreshUser,
     }),
-    [user, loading, login, loginWithOtp, register, logout, refreshUser]
+    [user, loading, login, register, logout, refreshUser]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

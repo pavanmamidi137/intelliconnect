@@ -47,11 +47,6 @@ class RegisterView(APIView):
         )
 
 
-# Password sign-in is reserved for platform admins — host accounts sign in
-# with an email verification code (see RequestOTPView).
-PASSWORD_LOGIN_ROLES = ("superadmin", "admin")
-
-
 class LoginView(TokenObtainPairView):
     permission_classes = [AllowAny]
 
@@ -76,15 +71,6 @@ class LoginView(TokenObtainPairView):
                 },
                 status=status.HTTP_403_FORBIDDEN,
             )
-        if user.role not in PASSWORD_LOGIN_ROLES:
-            return Response(
-                {
-                    "error": True,
-                    "code": "otp_required",
-                    "detail": "Host accounts sign in with an email verification code.",
-                },
-                status=status.HTTP_403_FORBIDDEN,
-            )
         data = response.data
         data.update(_token_payload(user))
         return Response(data)
@@ -105,125 +91,6 @@ class SafeTokenRefreshSerializer(TokenRefreshSerializer):
 
 class SafeTokenRefreshView(TokenRefreshView):
     serializer_class = SafeTokenRefreshSerializer
-
-
-class RequestOTPView(APIView):
-    """Send a 6-digit verification code to the user's email.
-
-    Passwordless login prevents duplicate accounts: a code only works for
-    an existing account tied to that email. When no account exists, the
-    response guides the user to registration. In development (DEBUG) the
-    code is returned so the flow works without an email backend.
-    """
-
-    permission_classes = [AllowAny]
-
-    def post(self, request):
-        import secrets
-        from datetime import timedelta
-
-        from django.conf import settings
-        from django.utils import timezone
-
-        from .emails import send_login_otp
-        from .models import LoginOTP
-
-        email = (request.data.get("email") or "").strip().lower()
-        user = User.objects.filter(email__iexact=email).first() if email else None
-
-        if user is None:
-            return Response(
-                {
-                    "message": "No account found with this email. Please register first.",
-                    "account_exists": False,
-                },
-                status=status.HTTP_200_OK,
-            )
-        if not user.is_active:
-            return Response(
-                {
-                    "error": True,
-                    "code": "account_disabled",
-                    "detail": "This account has been disabled.",
-                },
-                status=status.HTTP_403_FORBIDDEN,
-            )
-
-        # Platform admins skip the code entirely — they sign in with their
-        # password, so no OTP is generated or emailed for them.
-        if user.role in PASSWORD_LOGIN_ROLES:
-            return Response(
-                {
-                    "message": "Platform admin — sign in with your password.",
-                    "account_exists": True,
-                    "login_mode": "password",
-                    "role": user.role,
-                }
-            )
-
-        # Only the newest code is valid — invalidate any previous ones.
-        LoginOTP.objects.filter(user=user, used=False).update(used=True)
-        code = f"{secrets.randbelow(1_000_000):06d}"
-        LoginOTP.objects.create(
-            user=user,
-            code=code,
-            expires_at=timezone.now() + timedelta(minutes=10),
-        )
-        sent = send_login_otp(user.email, code)
-
-        payload = {
-            "message": "A verification code has been sent to your email.",
-            "account_exists": True,
-            "login_mode": "otp",
-            "role": user.role,
-            "expires_in": 600,
-        }
-        # Development convenience only — never exposed in production.
-        if settings.DEBUG and not sent:
-            payload["dev_code"] = code
-        return Response(payload)
-
-
-class VerifyOTPView(APIView):
-    """Exchange a verified email code for JWT tokens."""
-
-    permission_classes = [AllowAny]
-
-    def post(self, request):
-        from django.utils import timezone
-
-        from .models import LoginOTP
-
-        email = (request.data.get("email") or "").strip().lower()
-        code = str(request.data.get("code") or "").strip()
-        user = User.objects.filter(email__iexact=email).first()
-
-        if not email or not code or user is None:
-            return self._invalid()
-
-        otp = (
-            LoginOTP.objects.filter(user=user, code=code, used=False)
-            .order_by("-created_at")
-            .first()
-        )
-        if otp is None or otp.expires_at < timezone.now():
-            return self._invalid()
-        if otp.attempts >= 5:
-            return self._invalid()
-
-        otp.used = True
-        otp.save(update_fields=["used"])
-        return Response(_token_payload(user))
-
-    def _invalid(self):
-        return Response(
-            {
-                "error": True,
-                "code": "invalid_otp",
-                "detail": "Invalid or expired code. Request a new code and try again.",
-            },
-            status=status.HTTP_400_BAD_REQUEST,
-        )
 
 
 class LogoutView(APIView):

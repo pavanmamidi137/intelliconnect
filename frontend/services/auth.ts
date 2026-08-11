@@ -1,5 +1,5 @@
 import { api } from "@/lib/api";
-import type { AuthResponse, OtpRequestResult, User } from "@/types";
+import type { AuthResponse, User } from "@/types";
 
 export interface RegisterPayload {
   full_name: string;
@@ -19,16 +19,6 @@ export const authService = {
 
   async login(email: string, password: string) {
     return api.post<AuthResponse>("/auth/login/", { email, password });
-  },
-
-  /** Send a 6-digit verification code to the account's email. */
-  async requestOtp(email: string) {
-    return api.post<OtpRequestResult>("/auth/otp/request/", { email });
-  },
-
-  /** Exchange the emailed code for JWT tokens (passwordless login). */
-  async verifyOtp(email: string, code: string) {
-    return api.post<AuthResponse>("/auth/otp/verify/", { email, code });
   },
 
   async logout(refresh: string | null) {

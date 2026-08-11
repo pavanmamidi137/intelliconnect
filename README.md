@@ -136,8 +136,7 @@ cd backend
 ## API surface
 
 ```
-POST /api/auth/register/          POST /api/auth/login/
-POST /api/auth/otp/request/       POST /api/auth/otp/verify/   (passwordless login)
+POST /api/auth/register/          POST /api/auth/login/       (email + password)
 POST /api/auth/logout/            POST /api/auth/refresh/
 GET|PATCH /api/profile/           POST /api/profile/password/
 GET|PATCH /api/organization/
