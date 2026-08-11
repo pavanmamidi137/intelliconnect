@@ -47,6 +47,11 @@ class RegisterView(APIView):
         )
 
 
+# Password sign-in is reserved for platform admins — host accounts sign in
+# with an email verification code (see RequestOTPView).
+PASSWORD_LOGIN_ROLES = ("superadmin", "admin")
+
+
 class LoginView(TokenObtainPairView):
     permission_classes = [AllowAny]
 
@@ -68,6 +73,15 @@ class LoginView(TokenObtainPairView):
                     "error": True,
                     "code": "account_disabled",
                     "detail": "This account has been disabled.",
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        if user.role not in PASSWORD_LOGIN_ROLES:
+            return Response(
+                {
+                    "error": True,
+                    "code": "otp_required",
+                    "detail": "Host accounts sign in with an email verification code.",
                 },
                 status=status.HTTP_403_FORBIDDEN,
             )
@@ -135,6 +149,18 @@ class RequestOTPView(APIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
+        # Platform admins skip the code entirely — they sign in with their
+        # password, so no OTP is generated or emailed for them.
+        if user.role in PASSWORD_LOGIN_ROLES:
+            return Response(
+                {
+                    "message": "Platform admin — sign in with your password.",
+                    "account_exists": True,
+                    "login_mode": "password",
+                    "role": user.role,
+                }
+            )
+
         # Only the newest code is valid — invalidate any previous ones.
         LoginOTP.objects.filter(user=user, used=False).update(used=True)
         code = f"{secrets.randbelow(1_000_000):06d}"
@@ -148,6 +174,8 @@ class RequestOTPView(APIView):
         payload = {
             "message": "A verification code has been sent to your email.",
             "account_exists": True,
+            "login_mode": "otp",
+            "role": user.role,
             "expires_in": 600,
         }
         # Development convenience only — never exposed in production.

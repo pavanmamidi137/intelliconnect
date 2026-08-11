@@ -263,6 +263,9 @@ export interface OtpRequestResult {
   account_exists: boolean;
   expires_in?: number;
   dev_code?: string;
+  /** "password" for platform admins (they skip the code), "otp" for hosts. */
+  login_mode?: "otp" | "password";
+  role?: string;
 }
 
 export interface ImportResult {

@@ -112,6 +112,14 @@ export default function LoginPage() {
         return;
       }
       setEmail(values.email);
+      // Platform admins skip the code — the backend tells us to use the
+      // password form directly.
+      if (result.login_mode === "password") {
+        setMode("password");
+        passwordForm.setValue("email", values.email);
+        toast.info(result.message || "Platform admin — enter your password.");
+        return;
+      }
       if (result.dev_code) {
         setDevCode(result.dev_code);
       }
@@ -131,6 +139,11 @@ export default function LoginPage() {
     setSubmitting(true);
     try {
       const result = await authService.requestOtp(email);
+      if (result.login_mode === "password") {
+        setMode("password");
+        passwordForm.setValue("email", email);
+        return;
+      }
       if (result.dev_code) setDevCode(result.dev_code);
       startResendCountdown();
       toast.success("A new code has been sent.");
