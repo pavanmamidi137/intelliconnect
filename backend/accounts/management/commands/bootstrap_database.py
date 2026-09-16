@@ -8,15 +8,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         tables = set(connection.introspection.table_names())
         has_existing_schema = "organizations_organization" in tables
-        has_migration_history = False
 
-        if "django_migrations" in tables:
-            with connection.cursor() as cursor:
-                cursor.execute("SELECT COUNT(*) FROM django_migrations")
-                has_migration_history = cursor.fetchone()[0] > 0
-
-        if has_existing_schema and not has_migration_history:
-            call_command("migrate", fake=True, interactive=False, verbosity=0)
+        if has_existing_schema:
             if connection.vendor == "postgresql":
                 with connection.cursor() as cursor:
                     cursor.execute(
