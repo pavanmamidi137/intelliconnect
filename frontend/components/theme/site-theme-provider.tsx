@@ -52,13 +52,20 @@ function writeCache(theme: SiteTheme) {
 export function SiteThemeProvider({ children }: { children: React.ReactNode }) {
   // Seed from cache during hydration so the very first paint already has
   // the platform branding (no flash of the default palette).
-  const [theme, setTheme] = useState<SiteTheme>(() => readCache() ?? DEFAULT_SITE_THEME);
+  const [theme, setTheme] = useState<SiteTheme>(DEFAULT_SITE_THEME);
   const [loading, setLoading] = useState(true);
 
   // Apply the cached theme before the first paint.
   useLayoutEffect(() => {
     applySiteTheme(theme);
   }, [theme]);
+
+  /* eslint-disable react-hooks/set-state-in-effect -- restore cached branding after hydration */
+  useEffect(() => {
+    const cached = readCache();
+    if (cached) setTheme(cached);
+  }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   // Refresh from the backend in the background — GET is public, so this
   // works before login. Failures keep the cached/default theme.

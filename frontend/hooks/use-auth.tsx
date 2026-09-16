@@ -62,12 +62,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Seed from the cached profile so a returning visitor sees the app shell
   // instantly — no blank splash while /me round-trips. The background
   // hydrate below validates and refreshes it.
-  const [user, setUser] = useState<User | null>(() =>
-    typeof window !== "undefined" && api.isAuthenticated ? readUserCache() : null
-  );
-  const [loading, setLoading] = useState(
-    () => !(typeof window !== "undefined" && api.isAuthenticated && readUserCache())
-  );
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const hydrate = useCallback(async () => {
     if (!api.isAuthenticated) {
@@ -91,6 +87,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Hydrate the authenticated user once on mount (canonical auth pattern).
   useEffect(() => {
+    if (api.isAuthenticated) {
+      const cachedUser = readUserCache();
+      if (cachedUser) {
+        setUser(cachedUser);
+        setLoading(false);
+      }
+    }
     hydrate();
   }, [hydrate]);
 
