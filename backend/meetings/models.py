@@ -29,7 +29,7 @@ class Meeting(models.Model):
     )
     host = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,
         related_name="hosted_meetings",
     )
     title = models.CharField(max_length=255)
