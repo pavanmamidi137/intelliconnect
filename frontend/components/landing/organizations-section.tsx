@@ -21,16 +21,21 @@ const AUDIENCES = [
 
 export function OrganizationsSection() {
   return (
-    <section id="organizations" className="relative py-20 sm:py-28">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section id="organizations" className="relative overflow-hidden py-20 sm:py-28">
+      <div className="hero-mesh absolute inset-0 opacity-50" aria-hidden="true" />
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
           className="mx-auto max-w-2xl text-center"
         >
-          <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+          <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-primary">
+            <Building2 className="h-3.5 w-3.5" aria-hidden="true" />
+            Audiences
+          </span>
+          <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             Built for Organizations of Every Kind
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
@@ -42,13 +47,16 @@ export function OrganizationsSection() {
           {AUDIENCES.map((item, index) => (
             <motion.div
               key={item.label}
-              initial={{ opacity: 0, scale: 0.95 }}
+              initial={{ opacity: 0, scale: 0.94 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.35, delay: 0.05 * index }}
-              className="flex items-center gap-3 rounded-xl border border-border bg-card px-5 py-3.5 transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-[var(--shadow-card-hover)]"
+              transition={{ duration: 0.4, delay: 0.05 * index, ease: [0.16, 1, 0.3, 1] }}
+              whileHover={{ y: -4, scale: 1.02 }}
+              className="gradient-border glass glass-hover group flex items-center gap-3 rounded-xl px-5 py-3.5"
             >
-              <item.icon className="h-5 w-5 text-primary" aria-hidden="true" />
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500/15 to-sky-500/15 ring-1 ring-blue-500/20 transition-transform duration-300 group-hover:scale-110">
+                <item.icon className="h-4.5 w-4.5 text-primary" aria-hidden="true" />
+              </span>
               <div>
                 <p className="text-sm font-semibold text-foreground">{item.label}</p>
                 <p className="text-xs text-muted-foreground">{item.detail}</p>

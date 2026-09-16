@@ -91,7 +91,7 @@ function StatCard({
   accent?: string;
 }) {
   return (
-    <Card className="transition-shadow hover:shadow-[var(--shadow-card-hover)]">
+    <Card className="glass glass-hover transition-shadow">
       <CardContent className="flex items-center gap-4 p-5">
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/15 to-sky-500/15 ring-1 ring-blue-500/20">
           <Icon className={`h-5 w-5 ${accent}`} aria-hidden="true" />
@@ -257,7 +257,7 @@ function OverviewTab({ data }: { data: AdminDashboard }) {
           </CardHeader>
           <CardContent className="space-y-3">
             {data.providers.map((provider) => (
-              <div key={provider.name} className="flex items-center justify-between gap-3 rounded-lg border border-border/70 px-3 py-2.5">
+              <div key={provider.name} className="glass flex items-center justify-between gap-3 rounded-lg px-3 py-2.5">
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-foreground">{provider.label}</p>
                   <p className="truncate text-xs text-muted-foreground">{provider.model}</p>
@@ -290,7 +290,7 @@ function OverviewTab({ data }: { data: AdminDashboard }) {
               <p className="py-6 text-center text-sm text-muted-foreground">No organizations yet.</p>
             ) : (
               data.recent_organizations.map((org) => (
-                <div key={org.id} className="flex items-center gap-4 rounded-lg border border-border/70 p-3.5">
+                <div key={org.id} className="glass glass-hover flex items-center gap-4 rounded-lg p-3.5">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500/15 to-sky-500/15">
                     <Building2 className="h-4.5 w-4.5 text-primary" aria-hidden="true" />
                   </div>
@@ -320,7 +320,7 @@ function OverviewTab({ data }: { data: AdminDashboard }) {
               <p className="py-6 text-center text-sm text-muted-foreground">No meetings yet.</p>
             ) : (
               data.recent_meetings.map((meeting) => (
-                <div key={meeting.id} className="flex items-center gap-4 rounded-lg border border-border/70 p-3.5">
+                <div key={meeting.id} className="glass glass-hover flex items-center gap-4 rounded-lg p-3.5">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500/15 to-sky-500/15">
                     <Video className="h-4.5 w-4.5 text-primary" aria-hidden="true" />
                   </div>

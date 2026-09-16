@@ -43,15 +43,20 @@ export function AppSidebar({ mobile = false, open = false, onClose }: AppSidebar
 
   const content = (
     <div className="flex h-full flex-col">
-      <div className="flex h-16 items-center justify-between border-b border-border px-5">
-        <Link href={homeHref} onClick={onClose} aria-label="IntelliConnect dashboard">
+      <div className="flex h-16 items-center justify-between border-b border-border/60 px-5">
+        <Link
+          href={homeHref}
+          onClick={onClose}
+          className="transition-transform duration-300 hover:scale-[1.03]"
+          aria-label="IntelliConnect dashboard"
+        >
           <Logo />
         </Link>
         {mobile && (
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-accent/60 hover:text-foreground"
             aria-label="Close menu"
           >
             <X className="h-5 w-5" />
@@ -70,24 +75,24 @@ export function AppSidebar({ mobile = false, open = false, onClose }: AppSidebar
               onClick={onClose}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                "group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                 active
-                  ? "text-foreground"
-                  : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
+                  ? "text-primary"
+                  : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
               )}
             >
               {active && (
                 <motion.span
                   layoutId={mobile ? "mobile-active-pill" : "desktop-active-pill"}
-                  className="absolute inset-0 rounded-lg bg-accent"
-                  transition={{ type: "spring", stiffness: 400, damping: 32 }}
+                  className="gradient-border absolute inset-0 rounded-lg bg-gradient-to-r from-primary/15 via-blue-500/10 to-sky-500/15"
+                  transition={{ type: "spring", stiffness: 380, damping: 32 }}
                   aria-hidden="true"
                 />
               )}
               <item.icon
                 className={cn(
-                  "relative z-10 h-4.5 w-4.5",
-                  active ? "text-primary" : "text-muted-foreground"
+                  "relative z-10 h-4.5 w-4.5 transition-transform duration-300 group-hover:scale-110",
+                  active ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
                 )}
                 aria-hidden="true"
               />
@@ -97,6 +102,12 @@ export function AppSidebar({ mobile = false, open = false, onClose }: AppSidebar
         })}
       </nav>
 
+      {/* subtle brand footer */}
+      <div className="border-t border-border/60 p-4">
+        <p className="text-center text-[10px] uppercase tracking-widest text-muted-foreground/70">
+          Turn every conversation into action
+        </p>
+      </div>
     </div>
   );
 
@@ -113,7 +124,7 @@ export function AppSidebar({ mobile = false, open = false, onClose }: AppSidebar
         />
         <div
           className={cn(
-            "absolute inset-y-0 left-0 w-72 max-w-[85vw] border-r border-border bg-background shadow-2xl transition-transform duration-300 ease-out",
+            "glass-strong absolute inset-y-0 left-0 w-72 max-w-[85vw] border-r border-border shadow-2xl transition-transform duration-300 ease-out",
             open ? "translate-x-0" : "-translate-x-full"
           )}
           role={open ? "dialog" : undefined}
@@ -128,7 +139,7 @@ export function AppSidebar({ mobile = false, open = false, onClose }: AppSidebar
   }
 
   return (
-    <aside className="hidden w-64 shrink-0 border-r border-border bg-card/40 lg:block">
+    <aside className="glass-surface hidden w-64 shrink-0 border-r border-t-0 border-b-0 border-l-0 lg:block">
       <div className="sticky top-0 h-screen">{content}</div>
     </aside>
   );

@@ -3,7 +3,7 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: #ffffff;
+  --background: #f8fafc;
   --foreground: #0f172a;
 
   --card: #ffffff;
@@ -39,6 +39,9 @@
   --ring: #3b82f6;
 
   --radius: 0.75rem;
+
+  --accent-cta: #ea580c;
+  --accent-cta-soft: #fff7ed;
 }
 
 .dark {
@@ -76,6 +79,9 @@
   --border: #1e293b;
   --input: #1e293b;
   --ring: #60a5fa;
+
+  --accent-cta: #f97316;
+  --accent-cta-soft: #431407;
 }
 
 @theme inline {
@@ -104,6 +110,8 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-accent-cta: var(--accent-cta);
+  --color-accent-cta-soft: var(--accent-cta-soft);
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -118,11 +126,20 @@
   --shadow-card: 0 1px 2px 0 rgb(15 23 42 / 0.04), 0 1px 3px 0 rgb(15 23 42 / 0.06);
   --shadow-card-hover: 0 4px 6px -1px rgb(15 23 42 / 0.07), 0 10px 20px -6px rgb(15 23 42 / 0.12);
   --shadow-glow: 0 0 0 1px rgb(59 130 246 / 0.12), 0 12px 40px -8px rgb(37 99 235 / 0.35);
+  --shadow-glass: 0 8px 32px 0 rgb(31 38 135 / 0.08), 0 1px 2px 0 rgb(15 23 42 / 0.06);
+  --shadow-glass-hover: 0 12px 48px 0 rgb(31 38 135 / 0.14), 0 4px 12px 0 rgb(15 23 42 / 0.1);
+  --shadow-glow-accent: 0 0 0 1px rgb(234 88 12 / 0.14), 0 12px 44px -8px rgb(234 88 12 / 0.4);
 
   --animate-fade-in: fade-in 0.4s ease-out both;
   --animate-slide-up: slide-up 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
   --animate-scale-in: scale-in 0.2s ease-out both;
   --animate-shimmer: shimmer 1.8s linear infinite;
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-float-slow: float 9s ease-in-out infinite;
+  --animate-glow-pulse: glow-pulse 3.2s ease-in-out infinite;
+  --animate-gradient-shift: gradient-shift 8s ease infinite;
+  --animate-blur-in: blur-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-orb: orb-drift 18s ease-in-out infinite;
 
   @keyframes fade-in {
     from { opacity: 0; }
@@ -139,6 +156,27 @@
   @keyframes shimmer {
     from { background-position: 200% 0; }
     to { background-position: -200% 0; }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-14px); }
+  }
+  @keyframes glow-pulse {
+    0%, 100% { opacity: 0.55; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.06); }
+  }
+  @keyframes gradient-shift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+  @keyframes blur-in {
+    from { opacity: 0; transform: scale(0.98); filter: blur(8px); }
+    to { opacity: 1; transform: scale(1); filter: blur(0); }
+  }
+  @keyframes orb-drift {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+    33% { transform: translate3d(28px, -18px, 0) scale(1.08); }
+    66% { transform: translate3d(-20px, 14px, 0) scale(0.94); }
   }
 }
 
@@ -168,6 +206,7 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 /* Display font (Saira Condensed) for headings and brand — body text stays
@@ -175,6 +214,7 @@ body {
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
   line-height: 1.1;
+  letter-spacing: -0.01em;
 }
 
 /* Subtle grid + glow used in hero sections */
@@ -191,6 +231,22 @@ h1, h2, h3, h4, h5, h6 {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+
+/* Animated premium gradient text — background-position shifts slowly */
+.text-gradient-premium {
+  background: linear-gradient(
+    120deg,
+    var(--primary) 0%,
+    var(--violet) 30%,
+    var(--primary) 60%,
+    #f97316 95%
+  );
+  background-size: 220% 220%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gradient-shift 8s ease infinite;
 }
 
 .skeleton {
@@ -210,6 +266,122 @@ h1, h2, h3, h4, h5, h6 {
   );
   background-size: 200% 100%;
   animation: shimmer 1.8s linear infinite;
+}
+
+/* --- Glassmorphism utilities (UI UX Pro Max: "Glassmorphism" style) --- */
+
+/* Frosted panel — backdrop blur + translucent surface + hairline border */
+.glass {
+  background: color-mix(in srgb, var(--card) 62%, transparent);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+  box-shadow: var(--shadow-glass);
+}
+
+.glass-strong {
+  background: color-mix(in srgb, var(--card) 78%, transparent);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  box-shadow: var(--shadow-glass);
+}
+
+.glass-surface {
+  background: color-mix(in srgb, var(--card) 88%, transparent);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  backdrop-filter: blur(12px) saturate(140%);
+  border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+}
+
+.glass-hover {
+  transition: box-shadow 0.3s ease, transform 0.3s ease, border-color 0.3s ease,
+    background-color 0.3s ease;
+}
+.glass-hover:hover {
+  box-shadow: var(--shadow-glass-hover);
+  border-color: color-mix(in srgb, var(--primary) 38%, transparent);
+  transform: translateY(-3px);
+}
+
+/* Gradient border helper — uses a masked pseudo-element for a smooth
+   conic gradient ring. Apply to a relative container. */
+@layer utilities {
+  .gradient-border {
+    position: relative;
+  }
+  .gradient-border::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--primary) 45%, transparent),
+      color-mix(in srgb, var(--violet) 25%, transparent) 45%,
+      color-mix(in srgb, var(--border) 30%, transparent) 70%,
+      color-mix(in srgb, var(--accent-cta) 35%, transparent)
+    );
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    pointer-events: none;
+    opacity: 0.6;
+    transition: opacity 0.3s ease;
+  }
+  .gradient-border:hover::before {
+    opacity: 1;
+  }
+}
+
+/* Animated ambient gradient mesh used behind hero / CTA panels */
+.hero-mesh {
+  background:
+    radial-gradient(48% 44% at 12% 18%, rgb(37 99 235 / 0.14) 0%, transparent 100%),
+    radial-gradient(42% 38% at 88% 12%, rgb(14 165 233 / 0.12) 0%, transparent 100%),
+    radial-gradient(52% 46% at 76% 84%, rgb(37 99 235 / 0.1) 0%, transparent 100%),
+    radial-gradient(40% 36% at 20% 80%, rgb(234 88 12 / 0.07) 0%, transparent 100%);
+}
+
+/* Soft glowing orb */
+.glow-orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(70px);
+  pointer-events: none;
+  animation: orb-drift 18s ease-in-out infinite;
+}
+
+/* Shine sweep on hover (used on preview mockups & feature cards) */
+.shine {
+  position: relative;
+  overflow: hidden;
+}
+.shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgb(255 255 255 / 0.28) 50%,
+    transparent 60%
+  );
+  transform: translateX(-120%);
+  transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+.shine:hover::after {
+  transform: translateX(120%);
+}
+
+/* Subtle noisy grid overlay for app background */
+.app-grid {
+  background-image:
+    radial-gradient(circle at 1px 1px, rgb(99 102 241 / 0.045) 1px, transparent 0);
+  background-size: 24px 24px;
 }
 
 /* Accessible focus rings */

@@ -125,8 +125,13 @@ export default function ProcessingPage() {
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.4 }}
-          className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-blue-600 to-sky-500 shadow-[var(--shadow-glow)]"
+          className="relative mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-blue-600 to-sky-500 shadow-[var(--shadow-glow)]"
         >
+          <motion.span
+            aria-hidden="true"
+            className="absolute inset-0 rounded-3xl ring-1 ring-primary/30"
+            style={{ animation: "glow-pulse 2.6s ease-in-out infinite" }}
+          />
           {failed ? (
             <AlertTriangle className="h-9 w-9 text-white" aria-hidden="true" />
           ) : (
@@ -144,7 +149,7 @@ export default function ProcessingPage() {
       </div>
 
       {failed ? (
-        <Card>
+        <Card className="glass">
           <CardContent className="flex flex-col items-center gap-4 p-8 text-center">
             <p className="max-w-md text-sm text-muted-foreground">
               Your files and meeting data are safe. You can retry the analysis or
@@ -162,7 +167,7 @@ export default function ProcessingPage() {
           </CardContent>
         </Card>
       ) : (
-        <Card>
+        <Card className="glass">
           <CardContent className="p-6">
             <ol className="space-y-1">
               {STAGES.map((stage, index) => {

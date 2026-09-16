@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { motion } from "framer-motion";
 import { Building2, Eye, EyeOff, Lock, Mail, MoveRight, User } from "lucide-react";
 import { toast } from "sonner";
 
@@ -76,7 +77,11 @@ export default function RegisterPage() {
 
   return (
     <AuthLayout>
-      <div className="animate-[var(--animate-slide-up)]">
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      >
         <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
           Create your workspace
         </h1>
@@ -85,7 +90,12 @@ export default function RegisterPage() {
         </p>
 
         <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5" noValidate>
-          <div className="space-y-2">
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: 0.06, ease: [0.16, 1, 0.3, 1] }}
+            className="space-y-2"
+          >
             <Label htmlFor="full_name">Full Name</Label>
             <div className="relative">
               <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
@@ -98,9 +108,14 @@ export default function RegisterPage() {
               />
             </div>
             {errors.full_name && <p className="text-xs text-danger">{errors.full_name.message}</p>}
-          </div>
+          </motion.div>
 
-          <div className="space-y-2">
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+            className="space-y-2"
+          >
             <Label htmlFor="email">Email</Label>
             <div className="relative">
               <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
@@ -115,9 +130,14 @@ export default function RegisterPage() {
               />
             </div>
             {errors.email && <p className="text-xs text-danger">{errors.email.message}</p>}
-          </div>
+          </motion.div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: 0.18, ease: [0.16, 1, 0.3, 1] }}
+            className="grid gap-4 sm:grid-cols-2"
+          >
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <div className="relative">
@@ -161,9 +181,14 @@ export default function RegisterPage() {
                 <p className="text-xs text-danger">{errors.confirm_password.message}</p>
               )}
             </div>
-          </div>
+          </motion.div>
 
-          <div className="rounded-xl border border-border bg-muted/40 p-4">
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: 0.22, ease: [0.16, 1, 0.3, 1] }}
+            className="glass rounded-xl border-border p-4"
+          >
             <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-foreground">
               <Building2 className="h-4 w-4 text-primary" aria-hidden="true" />
               Your Organization
@@ -196,9 +221,14 @@ export default function RegisterPage() {
                 )}
               </div>
             </div>
-          </div>
+          </motion.div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: 0.26, ease: [0.16, 1, 0.3, 1] }}
+            className="grid gap-4 sm:grid-cols-2"
+          >
             <div className="space-y-2">
               <Label htmlFor="designation">Designation (optional)</Label>
               <Input id="designation" placeholder="e.g. Engineering Manager" {...register("designation")} />
@@ -207,8 +237,13 @@ export default function RegisterPage() {
               <Label htmlFor="department">Department (optional)</Label>
               <Input id="department" placeholder="e.g. Engineering" {...register("department")} />
             </div>
-          </div>
+          </motion.div>
 
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          >
           <Button type="submit" variant="gradient" className="w-full" size="lg" disabled={submitting}>
             {submitting ? (
               <Spinner className="h-4 w-4 border-white/60" />
@@ -223,6 +258,7 @@ export default function RegisterPage() {
             By creating an account you agree to IntelliConnect&apos;s terms of service and
             privacy policy.
           </p>
+          </motion.div>
         </form>
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
@@ -231,7 +267,7 @@ export default function RegisterPage() {
             Sign in
           </Link>
         </p>
-      </div>
+      </motion.div>
     </AuthLayout>
   );
 }

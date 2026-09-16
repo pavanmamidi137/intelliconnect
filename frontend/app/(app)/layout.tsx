@@ -66,19 +66,22 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <AppSidebar mobile open={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />
-      <AppSidebar />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <AppTopbar onMenuClick={() => setMobileNavOpen(true)} />
-        <motion.main
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, ease: "easeOut" }}
-          className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-8"
-        >
-          {children}
-        </motion.main>
+    <div className="relative flex min-h-screen overflow-x-clip bg-background">
+      <div className="hero-mesh pointer-events-none fixed inset-0 opacity-50" aria-hidden="true" />
+      <div className="relative z-10 flex min-h-screen w-full">
+        <AppSidebar mobile open={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />
+        <AppSidebar />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <AppTopbar onMenuClick={() => setMobileNavOpen(true)} />
+          <motion.main
+            initial={{ opacity: 0, y: 10, scale: 0.995 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-8"
+          >
+            {children}
+          </motion.main>
+        </div>
       </div>
     </div>
   );

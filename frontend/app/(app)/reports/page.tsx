@@ -124,7 +124,7 @@ export default function ReportsPage() {
       {!query.isLoading && !query.isError && data && data.count > 0 && (
         <>
           {/* Desktop table */}
-          <div className="hidden overflow-hidden rounded-xl border border-border bg-card shadow-[var(--shadow-card)] md:block">
+          <div className="glass hidden overflow-hidden rounded-xl md:block">
             <Table>
               <TableHeader>
                 <TableRow>

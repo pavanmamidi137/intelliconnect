@@ -226,7 +226,7 @@ export default function PeoplePage() {
       {/* Desktop table */}
       {!loading && !error && data && data.count > 0 && (
         <>
-          <div className="hidden overflow-hidden rounded-xl border border-border bg-card shadow-[var(--shadow-card)] md:block">
+          <div className="glass hidden overflow-hidden rounded-xl md:block">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -321,7 +321,7 @@ export default function PeoplePage() {
                 key={person.id}
                 type="button"
                 onClick={() => router.push(`/people/${person.id}`)}
-                className="w-full rounded-xl border border-border bg-card p-4 text-left shadow-[var(--shadow-card)] transition-shadow active:scale-[0.99]"
+                className="glass glass-hover w-full rounded-xl p-4 text-left transition-shadow active:scale-[0.99]"
               >
                 <div className="flex items-center gap-3">
                   <Avatar className="h-10 w-10">

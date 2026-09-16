@@ -9,36 +9,99 @@ import {
   CheckCircle2,
   FileText,
   ListChecks,
+  ShieldCheck,
   Sparkles,
   Users,
+  Zap,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
+const container = {
+  hidden: {},
+  show: {
+    transition: { staggerChildren: 0.1, delayChildren: 0.05 },
+  },
+};
+
 const fadeUp = {
-  hidden: { opacity: 0, y: 20 },
-  show: (i: number) => ({
+  hidden: { opacity: 0, y: 24 },
+  show: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.5, delay: 0.08 * i, ease: "easeOut" as const },
-  }),
+    transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const },
+  },
 };
+
+const PARTICLES = [
+  { left: "8%", top: "22%", size: 6, delay: 0 },
+  { left: "16%", top: "68%", size: 4, delay: 1.2 },
+  { left: "28%", top: "12%", size: 5, delay: 0.6 },
+  { left: "68%", top: "18%", size: 5, delay: 1.6 },
+  { left: "82%", top: "46%", size: 7, delay: 0.3 },
+  { left: "92%", top: "72%", size: 4, delay: 0.9 },
+  { left: "44%", top: "84%", size: 5, delay: 1.9 },
+  { left: "58%", top: "8%", size: 4, delay: 2.4 },
+];
+
+const FLOAT_STATS = [
+  { icon: Zap, label: "Minutes to analyze", value: "< 2" },
+  { icon: ShieldCheck, label: "SOC 2-ready", value: "Secure" },
+];
 
 export function Hero() {
   return (
     <section className="relative overflow-hidden pt-32 pb-20 sm:pt-40 sm:pb-28">
-      {/* background decoration */}
+      {/* ambient background */}
+      <div className="hero-mesh absolute inset-0" aria-hidden="true" />
       <div className="hero-grid absolute inset-0" aria-hidden="true" />
+
+      {/* floating glass orbs */}
       <div
-        className="pointer-events-none absolute -top-40 left-1/2 h-[480px] w-[820px] -translate-x-1/2 rounded-full bg-gradient-to-r from-blue-500/20 to-sky-500/20 blur-3xl"
+        className="glow-orb left-[8%] top-[16%] h-72 w-72 bg-blue-500/25"
+        style={{ animationDelay: "0s" }}
+        aria-hidden="true"
+      />
+      <div
+        className="glow-orb right-[6%] top-[24%] h-80 w-80 bg-sky-500/20"
+        style={{ animationDelay: "-6s" }}
+        aria-hidden="true"
+      />
+      <div
+        className="glow-orb bottom-[6%] left-[42%] h-64 w-64 bg-orange-500/10"
+        style={{ animationDelay: "-12s" }}
         aria-hidden="true"
       />
 
+      {/* particle dots */}
+      {PARTICLES.map((p, i) => (
+        <span
+          key={i}
+          className="absolute rounded-full bg-primary/40 blur-[1px]"
+          style={{
+            left: p.left,
+            top: p.top,
+            width: p.size,
+            height: p.size,
+            animation: `float ${4 + (i % 3)}s ease-in-out ${p.delay}s infinite`,
+          }}
+          aria-hidden="true"
+        />
+      ))}
+
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-3xl text-center">
-          <motion.div variants={fadeUp} initial="hidden" animate="show" custom={0}>
-            <Badge variant="violet" className="mb-6 px-3 py-1 text-sm">
+        <motion.div
+          variants={container}
+          initial="hidden"
+          animate="show"
+          className="mx-auto max-w-3xl text-center"
+        >
+          <motion.div variants={fadeUp}>
+            <Badge
+              variant="violet"
+              className="animate-[var(--animate-glow-pulse)] mb-6 gap-2 px-4 py-1.5 text-sm shadow-[var(--shadow-glass)]"
+            >
               <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
               AI-powered meeting intelligence
             </Badge>
@@ -46,19 +109,15 @@ export function Hero() {
 
           <motion.h1
             variants={fadeUp}
-            initial="hidden"
-            animate="show"
-            custom={1}
             className="text-4xl font-extrabold tracking-tight text-foreground sm:text-6xl lg:text-7xl"
           >
-            Turn Every <span className="text-gradient">Conversation</span> Into Action.
+            Turn Every{" "}
+            <span className="text-gradient-premium">Conversation</span> Into
+            Action.
           </motion.h1>
 
           <motion.p
             variants={fadeUp}
-            initial="hidden"
-            animate="show"
-            custom={2}
             className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl"
           >
             IntelliConnect transforms meeting transcripts into intelligent summaries,
@@ -68,9 +127,6 @@ export function Hero() {
 
           <motion.div
             variants={fadeUp}
-            initial="hidden"
-            animate="show"
-            custom={3}
             className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row"
           >
             <Button asChild size="lg" variant="gradient" className="w-full sm:w-auto">
@@ -79,40 +135,50 @@ export function Hero() {
                 <ArrowRight aria-hidden="true" />
               </Link>
             </Button>
-            <Button asChild size="lg" variant="outline" className="w-full sm:w-auto">
+            <Button asChild size="lg" variant="outline" className="glass-surface w-full sm:w-auto">
               <a href="#features">Explore Features</a>
             </Button>
           </motion.div>
 
-          <motion.p
+          {/* trust stats row */}
+          <motion.div
             variants={fadeUp}
-            initial="hidden"
-            animate="show"
-            custom={4}
-            className="mt-6 text-sm text-muted-foreground"
+            className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-3"
           >
-            No credit card required · Set up in minutes · SOC 2-ready architecture
-          </motion.p>
-        </div>
+            {FLOAT_STATS.map((stat) => (
+              <div
+                key={stat.label}
+                className="flex items-center gap-2 rounded-full glass-surface px-4 py-1.5 text-sm"
+              >
+                <stat.icon className="h-4 w-4 text-primary" aria-hidden="true" />
+                <span className="font-semibold text-foreground">{stat.value}</span>
+                <span className="text-muted-foreground">{stat.label}</span>
+              </div>
+            ))}
+            <p className="text-sm text-muted-foreground">
+              No credit card required · Set up in minutes
+            </p>
+          </motion.div>
+        </motion.div>
 
         {/* Product preview mockup */}
         <motion.div
-          initial={{ opacity: 0, y: 40, scale: 0.97 }}
+          initial={{ opacity: 0, y: 48, scale: 0.96 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.7, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
           className="relative mx-auto mt-16 max-w-5xl sm:mt-20"
         >
           <div
-            className="absolute -inset-4 rounded-3xl bg-gradient-to-r from-blue-500/15 to-sky-500/15 blur-2xl"
+            className="animate-[var(--animate-float-slow)] absolute -inset-6 rounded-3xl bg-gradient-to-r from-blue-500/20 via-sky-500/15 to-orange-500/15 blur-3xl"
             aria-hidden="true"
           />
-          <div className="relative overflow-hidden rounded-2xl border border-border bg-card shadow-2xl">
+          <div className="gradient-border glass-strong relative overflow-hidden rounded-2xl shadow-[var(--shadow-glass-hover)]">
             {/* mockup chrome */}
-            <div className="flex items-center gap-2 border-b border-border bg-muted/50 px-4 py-3">
+            <div className="flex items-center gap-2 border-b border-border bg-muted/40 px-4 py-3">
               <span className="h-3 w-3 rounded-full bg-danger/70" />
               <span className="h-3 w-3 rounded-full bg-warning/70" />
               <span className="h-3 w-3 rounded-full bg-success/70" />
-              <div className="ml-4 hidden items-center gap-2 rounded-md bg-background px-3 py-1 text-xs text-muted-foreground sm:flex">
+              <div className="glass-surface ml-4 hidden items-center gap-2 rounded-md px-3 py-1 text-xs text-muted-foreground sm:flex">
                 <Bot className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
                 IntelliConnect · Meeting Intelligence
               </div>
@@ -121,10 +187,10 @@ export function Hero() {
             <div className="grid gap-4 p-4 sm:p-6 lg:grid-cols-5">
               {/* summary */}
               <div className="lg:col-span-3">
-                <div className="rounded-xl border border-border bg-background p-5">
+                <div className="glass-surface shine rounded-xl p-5">
                   <div className="mb-3 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10 text-primary">
+                      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10 text-primary ring-1 ring-blue-500/20">
                         <FileText className="h-4 w-4" aria-hidden="true" />
                       </span>
                       <div>
@@ -134,7 +200,9 @@ export function Hero() {
                         </p>
                       </div>
                     </div>
-                    <Badge variant="success">Analyzed</Badge>
+                    <Badge variant="success" className="animate-[var(--animate-glow-pulse)]">
+                      Analyzed
+                    </Badge>
                   </div>
 
                   <p className="text-sm leading-relaxed text-muted-foreground">
@@ -157,7 +225,7 @@ export function Hero() {
 
               {/* side column: tasks + people + pdf */}
               <div className="space-y-4 lg:col-span-2">
-                <div className="rounded-xl border border-border bg-background p-5">
+                <div className="glass-surface shine rounded-xl p-5">
                   <div className="mb-3 flex items-center gap-2">
                     <ListChecks className="h-4 w-4 text-primary" aria-hidden="true" />
                     <p className="text-sm font-semibold text-foreground">AI Extracted Tasks</p>
@@ -167,7 +235,7 @@ export function Hero() {
                       { name: "Ravi Kumar", task: "Prepare API documentation", conf: 94 },
                       { name: "Priya Sharma", task: "Schedule design review", conf: 91 },
                     ].map((item) => (
-                      <div key={item.task} className="rounded-lg bg-muted/60 p-2.5">
+                      <div key={item.task} className="rounded-lg bg-muted/50 p-2.5">
                         <p className="text-xs font-medium text-foreground">{item.task}</p>
                         <div className="mt-1.5 flex items-center justify-between">
                           <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -182,9 +250,9 @@ export function Hero() {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between rounded-xl border border-border bg-background p-4">
+                <div className="glass-surface shine flex items-center justify-between rounded-xl p-4">
                   <div className="flex items-center gap-2">
-                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet ring-1 ring-violet-500/20">
                       <FileText className="h-4 w-4" aria-hidden="true" />
                     </span>
                     <div>
@@ -193,7 +261,7 @@ export function Hero() {
                     </div>
                   </div>
                   <Badge variant="success">
-                    <span className="h-1.5 w-1.5 rounded-full bg-success" aria-hidden="true" />
+                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-success" aria-hidden="true" />
                     Generated
                   </Badge>
                 </div>

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { motion } from "framer-motion";
 import { useTheme } from "@/components/theme/theme-provider";
 import {
   Building2,
@@ -113,10 +114,15 @@ function AccountSettings() {
 
   return (
     <div className="grid max-w-3xl gap-6">
-      <Card>
-        <CardHeader>
+      <motion.div
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, delay: 0, ease: [0.16, 1, 0.3, 1] }}
+        className="glass rounded-xl"
+      >
+        <div className="p-6">
           <CardTitle>Account Settings</CardTitle>
-        </CardHeader>
+        </div>
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="set-full_name">Full Name</Label>
@@ -143,14 +149,19 @@ function AccountSettings() {
             </Button>
           </div>
         </CardContent>
-      </Card>
+      </motion.div>
 
-      <Card>
-        <CardHeader>
+      <motion.div
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
+        className="glass rounded-xl"
+      >
+        <div className="p-6">
           <CardTitle className="flex items-center gap-2">
             <Lock className="h-4 w-4 text-primary" aria-hidden="true" /> Change Password
           </CardTitle>
-        </CardHeader>
+        </div>
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="set-current-pw">Current Password</Label>
@@ -189,7 +200,7 @@ function AccountSettings() {
             </Button>
           </div>
         </CardContent>
-      </Card>
+      </motion.div>
     </div>
   );
 }
@@ -214,13 +225,13 @@ function OrganizationSettings() {
 
   if (orgQuery.isLoading) {
     return (
-      <Card className="max-w-3xl">
+      <div className="glass max-w-3xl rounded-xl">
         <CardContent className="space-y-4 p-6">
           <Skeleton className="h-10 w-full" />
           <Skeleton className="h-10 w-full" />
           <Skeleton className="h-24 w-full" />
         </CardContent>
-      </Card>
+      </div>
     );
   }
 
@@ -241,10 +252,15 @@ function OrganizationSettings() {
   };
 
   return (
-    <Card className="max-w-3xl">
-      <CardHeader>
+    <motion.div
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+      className="glass max-w-3xl rounded-xl"
+    >
+      <div className="p-6">
         <CardTitle>Organization Settings</CardTitle>
-      </CardHeader>
+      </div>
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="set-org-name">Organization Name</Label>
@@ -274,7 +290,7 @@ function OrganizationSettings() {
           </Button>
         </div>
       </CardContent>
-    </Card>
+    </motion.div>
   );
 }
 
@@ -392,7 +408,7 @@ function BrandDesignSettings() {
 
   return (
     <div className="max-w-3xl space-y-6">
-      <Card>
+      <Card className="glass glass-hover">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Paintbrush className="h-4 w-4 text-primary" aria-hidden="true" /> Brand &amp; Design
@@ -451,7 +467,7 @@ function BrandDesignSettings() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="glass glass-hover">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <Type className="h-4 w-4 text-primary" aria-hidden="true" /> Preview
@@ -487,7 +503,7 @@ function AppearanceSettings() {
   ];
 
   return (
-    <Card className="max-w-3xl">
+    <Card className="glass glass-hover max-w-3xl">
       <CardHeader>
         <CardTitle>Appearance</CardTitle>
       </CardHeader>

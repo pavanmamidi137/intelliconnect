@@ -227,11 +227,11 @@ function MeetingGrid({ meetings }: { meetings: MeetingSummaryItem[] }) {
         <Link
           key={meeting.id}
           href={`/meetings/${meeting.id}`}
-          className="group animate-[var(--animate-slide-up)] rounded-xl border border-border bg-card p-5 shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-[var(--shadow-card-hover)]"
+          className="glass glass-hover group animate-[var(--animate-slide-up)] rounded-xl p-5"
           style={{ animationDelay: `${Math.min(index * 40, 240)}ms` }}
         >
           <div className="flex items-start justify-between gap-3">
-            <h3 className="font-semibold leading-snug text-foreground line-clamp-2">{meeting.title}</h3>
+            <h3 className="font-semibold leading-snug text-foreground line-clamp-2 transition-colors duration-300 group-hover:text-primary">{meeting.title}</h3>
             <MeetingStatusBadge status={meeting.status} />
           </div>
 
@@ -260,7 +260,7 @@ function MeetingGrid({ meetings }: { meetings: MeetingSummaryItem[] }) {
           </div>
 
           {/* meta */}
-          <div className="mt-4 flex items-center gap-4 border-t border-border pt-3 text-xs text-muted-foreground">
+          <div className="mt-4 flex items-center gap-4 border-t border-border/60 pt-3 text-xs text-muted-foreground">
             <span className="inline-flex items-center gap-1">
               <ListChecks className="h-3.5 w-3.5" aria-hidden="true" /> {meeting.tasks_count} tasks
             </span>
@@ -281,7 +281,7 @@ function MeetingGrid({ meetings }: { meetings: MeetingSummaryItem[] }) {
 
 function MeetingTable({ meetings }: { meetings: MeetingSummaryItem[] }) {
   return (
-    <div className="overflow-hidden rounded-xl border border-border bg-card shadow-[var(--shadow-card)]">
+    <div className="glass overflow-hidden rounded-xl">
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
@@ -297,7 +297,7 @@ function MeetingTable({ meetings }: { meetings: MeetingSummaryItem[] }) {
           </TableHeader>
           <TableBody>
             {meetings.map((meeting) => (
-              <TableRow key={meeting.id}>
+              <TableRow key={meeting.id} className="transition-colors hover:bg-primary/5">
                 <TableCell>
                   <Link href={`/meetings/${meeting.id}`} className="font-medium text-foreground hover:text-primary">
                     {meeting.title}

@@ -1,10 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, Saira_Condensed } from "next/font/google";
+import { Geist_Mono, Plus_Jakarta_Sans, Saira_Condensed } from "next/font/google";
 
 import { Providers } from "@/components/providers";
 import "./globals.css";
 
-const geistSans = Geist({
+const geistSans = Plus_Jakarta_Sans({
   variable: "--font-geist-sans",
   subsets: ["latin"],
 });

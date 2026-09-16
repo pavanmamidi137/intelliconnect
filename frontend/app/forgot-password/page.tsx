@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { motion } from "framer-motion";
 import { CheckCircle2, KeyRound, Lock, Mail, MoveRight } from "lucide-react";
 import { toast } from "sonner";
 
@@ -83,10 +84,20 @@ function ForgotPasswordInner() {
 
   if (done) {
     return (
-      <div className="animate-[var(--animate-slide-up)] text-center">
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-success-soft">
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        className="text-center"
+      >
+        <motion.div
+          initial={{ scale: 0.6, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+          className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-success-soft ring-1 ring-success/20"
+        >
           <CheckCircle2 className="h-7 w-7 text-success" aria-hidden="true" />
-        </div>
+        </motion.div>
         <h1 className="text-2xl font-bold tracking-tight text-foreground">Password reset</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Your password has been updated. Sign in with your new password.
@@ -94,13 +105,17 @@ function ForgotPasswordInner() {
         <Button asChild variant="gradient" className="mt-6 w-full" size="lg">
           <a href="/login">Go to Sign In</a>
         </Button>
-      </div>
+      </motion.div>
     );
   }
 
   if (token) {
     return (
-      <div className="animate-[var(--animate-slide-up)]">
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      >
         <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
           Set a new password
         </h1>
@@ -108,7 +123,12 @@ function ForgotPasswordInner() {
           Choose a new password for your IntelliConnect account.
         </p>
         <form onSubmit={resetForm.handleSubmit(resetPassword)} className="mt-8 space-y-5" noValidate>
-          <div className="space-y-2">
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: 0.06, ease: [0.16, 1, 0.3, 1] }}
+            className="space-y-2"
+          >
             <Label htmlFor="new_password">New Password</Label>
             <div className="relative">
               <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
@@ -124,8 +144,13 @@ function ForgotPasswordInner() {
             {resetForm.formState.errors.new_password && (
               <p className="text-xs text-danger">{resetForm.formState.errors.new_password.message}</p>
             )}
-          </div>
-          <div className="space-y-2">
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+            className="space-y-2"
+          >
             <Label htmlFor="confirm_password">Confirm Password</Label>
             <div className="relative">
               <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
@@ -141,17 +166,27 @@ function ForgotPasswordInner() {
             {resetForm.formState.errors.confirm_password && (
               <p className="text-xs text-danger">{resetForm.formState.errors.confirm_password.message}</p>
             )}
-          </div>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: 0.14, ease: [0.16, 1, 0.3, 1] }}
+          >
           <Button type="submit" variant="gradient" className="w-full" size="lg" disabled={submitting}>
             {submitting ? <Spinner className="h-4 w-4 border-white/60" /> : <>Reset Password <MoveRight aria-hidden="true" /></>}
           </Button>
+          </motion.div>
         </form>
-      </div>
+      </motion.div>
     );
   }
 
   return (
-    <div className="animate-[var(--animate-slide-up)]">
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+    >
       <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Forgot password</h1>
       <p className="mt-2 text-sm text-muted-foreground">
         {sent
@@ -199,7 +234,7 @@ function ForgotPasswordInner() {
           Back to sign in
         </a>
       </p>
-    </div>
+    </motion.div>
   );
 }
 

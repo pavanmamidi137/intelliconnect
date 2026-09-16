@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Eye, EyeOff, Lock, Mail, MoveRight } from "lucide-react";
+import { motion } from "framer-motion";
 import { toast } from "sonner";
 
 import { AuthLayout } from "@/components/auth/auth-layout";
@@ -58,16 +59,21 @@ export default function LoginPage() {
 
   return (
     <AuthLayout>
-      <div className="animate-[var(--animate-slide-up)]">
+      <div className="animate-[var(--animate-blur-in)]">
         <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-          Sign in
+          Welcome back
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Welcome back. Sign in with your email and password to continue.
+          Sign in with your email and password to continue.
         </p>
 
         <form onSubmit={submit} className="mt-8 space-y-5" noValidate>
-          <div className="space-y-2">
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+            className="space-y-2"
+          >
             <Label htmlFor="email">Email</Label>
             <div className="relative">
               <Mail
@@ -85,9 +91,14 @@ export default function LoginPage() {
               />
             </div>
             {errors.email && <p className="text-xs text-danger">{errors.email.message}</p>}
-          </div>
+          </motion.div>
 
-          <div className="space-y-2">
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.18, ease: [0.16, 1, 0.3, 1] }}
+            className="space-y-2"
+          >
             <div className="flex items-center justify-between">
               <Label htmlFor="password">Password</Label>
               <Link href="/forgot-password" className="text-xs font-medium text-primary hover:underline">
@@ -118,19 +129,30 @@ export default function LoginPage() {
               </button>
             </div>
             {errors.password && <p className="text-xs text-danger">{errors.password.message}</p>}
-          </div>
+          </motion.div>
 
-          <Button type="submit" variant="gradient" className="w-full" size="lg" disabled={submitting}>
-            {submitting ? <Spinner className="h-4 w-4 border-white/60" /> : <>Sign In <MoveRight aria-hidden="true" /></>}
-          </Button>
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.26, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <Button type="submit" variant="gradient" className="w-full" size="lg" disabled={submitting}>
+              {submitting ? <Spinner className="h-4 w-4 border-white/60" /> : <>Sign In <MoveRight aria-hidden="true" /></>}
+            </Button>
+          </motion.div>
         </form>
 
-        <p className="mt-8 text-center text-sm text-muted-foreground">
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4, delay: 0.4 }}
+          className="mt-6 text-center text-sm text-muted-foreground"
+        >
           Don&apos;t have an account?{" "}
           <Link href="/register" className="font-semibold text-primary hover:underline">
             Get started free
           </Link>
-        </p>
+        </motion.p>
       </div>
     </AuthLayout>
   );

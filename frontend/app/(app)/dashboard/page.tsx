@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import {
@@ -22,10 +23,8 @@ import { PageHeader } from "@/components/shared/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
   CardContent,
   CardDescription,
-  CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -49,32 +48,75 @@ const STATUS_LABELS: Record<MeetingStatus, string> = {
   failed: "Failed",
 };
 
+function AnimatedNumber({ value }: { value: number }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const [display, setDisplay] = useState("0");
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          const start = performance.now();
+          const duration = 1200;
+          const tick = (now: number) => {
+            const progress = Math.min((now - start) / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 4);
+            setDisplay(String(Math.round(value * eased)));
+            if (progress < 1) {
+              requestAnimationFrame(tick);
+            }
+          };
+          requestAnimationFrame(tick);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.4 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [value]);
+
+  return <span ref={ref}>{display}</span>;
+}
+
 function StatCard({
   icon: Icon,
   label,
   value,
   hint,
   accent = "text-primary",
+  delay = 0,
 }: {
   icon: React.ComponentType<{ className?: string }>;
   label: string;
   value: string | number;
   hint?: string;
   accent?: string;
+  delay?: number;
 }) {
   return (
-    <Card className="transition-shadow hover:shadow-[var(--shadow-card-hover)]">
-      <CardContent className="flex items-start gap-4 p-5">
-        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/15 to-sky-500/15 ring-1 ring-blue-500/20`}>
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay, ease: [0.16, 1, 0.3, 1] }}
+      className="gradient-border glass glass-hover group relative overflow-hidden rounded-xl p-5"
+    >
+      <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-gradient-to-br from-blue-500/10 to-sky-500/5 blur-2xl transition-opacity duration-300 group-hover:opacity-100" aria-hidden="true" />
+      <div className="flex items-start gap-4">
+        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/15 to-sky-500/15 ring-1 ring-blue-500/20 transition-transform duration-300 group-hover:scale-110`}>
           <Icon className={`h-5 w-5 ${accent}`} aria-hidden="true" />
         </div>
         <div className="min-w-0">
           <p className="text-sm text-muted-foreground">{label}</p>
-          <p className="mt-0.5 text-2xl font-bold tabular-nums text-foreground">{value}</p>
+          <p className="mt-0.5 text-2xl font-bold tabular-nums text-foreground">
+            {typeof value === "number" ? <AnimatedNumber value={value} /> : value}
+          </p>
           {hint && <p className="mt-0.5 truncate text-xs text-muted-foreground">{hint}</p>}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </motion.div>
   );
 }
 
@@ -155,7 +197,7 @@ export default function HostDashboardPage() {
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
             className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
           >
             <StatCard
@@ -163,12 +205,14 @@ export default function HostDashboardPage() {
               label="Meetings"
               value={stats.total_meetings}
               hint={`${stats.meetings_by_status.review_required} awaiting review`}
+              delay={0}
             />
             <StatCard
               icon={Users}
               label="People"
               value={stats.people_count}
               hint="Connected to your organization"
+              delay={0.06}
             />
             <StatCard
               icon={ListChecks}
@@ -179,6 +223,7 @@ export default function HostDashboardPage() {
                   ? `${stats.tasks_due_soon} due within 7 days`
                   : `${stats.completed_tasks} completed overall`
               }
+              delay={0.12}
             />
             <StatCard
               icon={FileBarChart2}
@@ -186,16 +231,22 @@ export default function HostDashboardPage() {
               value={stats.reports_count}
               hint={`${stats.decisions_count} decisions captured`}
               accent="text-violet"
+              delay={0.18}
             />
           </motion.div>
 
           <div className="grid gap-6 lg:grid-cols-5">
             {/* Meeting status breakdown */}
-            <Card className="lg:col-span-2">
-              <CardHeader>
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.22, ease: [0.16, 1, 0.3, 1] }}
+              className="glass glass-hover relative overflow-hidden rounded-xl lg:col-span-2"
+            >
+              <div className="p-6">
                 <CardTitle>Meetings by Status</CardTitle>
                 <CardDescription>Real-time breakdown of every meeting you&apos;ve hosted.</CardDescription>
-              </CardHeader>
+              </div>
               <CardContent className="space-y-4">
                 {STATUS_ORDER.map((status) => {
                   const count = stats.meetings_by_status[status] ?? 0;
@@ -206,31 +257,38 @@ export default function HostDashboardPage() {
                         <span className="text-muted-foreground">{STATUS_LABELS[status]}</span>
                         <span className="font-medium tabular-nums text-foreground">{count}</span>
                       </div>
-                      <div className="h-2 overflow-hidden rounded-full bg-muted" role="img" aria-label={`${STATUS_LABELS[status]}: ${count} meetings (${pct}%)`}>
-                        <div
+                      <div className="h-2 overflow-hidden rounded-full bg-muted/70" role="img" aria-label={`${STATUS_LABELS[status]}: ${count} meetings (${pct}%)`}>
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${pct}%` }}
+                          transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
                           className={`h-full rounded-full transition-all duration-500 ${
                             status === "completed"
-                              ? "bg-success"
+                              ? "bg-gradient-to-r from-success to-emerald-400"
                               : status === "review_required"
-                                ? "bg-warning"
+                                ? "bg-gradient-to-r from-warning to-amber-400"
                                 : status === "processing"
-                                  ? "bg-violet"
+                                  ? "bg-gradient-to-r from-violet to-sky-400"
                                   : status === "failed"
-                                    ? "bg-danger"
-                                    : "bg-primary/60"
+                                    ? "bg-gradient-to-r from-danger to-rose-400"
+                                    : "bg-gradient-to-r from-primary to-sky-400"
                           }`}
-                          style={{ width: `${pct}%` }}
                         />
                       </div>
                     </div>
                   );
                 })}
               </CardContent>
-            </Card>
+            </motion.div>
 
             {/* Recent meetings */}
-            <Card className="lg:col-span-3">
-              <CardHeader className="flex-row items-center justify-between space-y-0">
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="glass glass-hover relative overflow-hidden rounded-xl lg:col-span-3"
+            >
+              <div className="flex flex-row items-center justify-between space-y-0 p-6">
                 <div>
                   <CardTitle>Recent Meetings</CardTitle>
                   <CardDescription>Your latest meetings and their status.</CardDescription>
@@ -240,7 +298,7 @@ export default function HostDashboardPage() {
                     View all <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
                   </Link>
                 </Button>
-              </CardHeader>
+              </div>
               <CardContent className="space-y-3">
                 {data.recent_meetings.length === 0 ? (
                   <p className="py-8 text-center text-sm text-muted-foreground">
@@ -251,9 +309,9 @@ export default function HostDashboardPage() {
                     <Link
                       key={meeting.id}
                       href={`/meetings/${meeting.id}`}
-                      className="flex items-center gap-4 rounded-lg border border-border/70 bg-card/50 p-3.5 transition hover:border-primary/40 hover:bg-accent/40"
+                      className="group flex items-center gap-4 rounded-lg border border-border/60 bg-card/40 p-3.5 transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:bg-accent/40 hover:shadow-[var(--shadow-card-hover)]"
                     >
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500/15 to-sky-500/15">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500/15 to-sky-500/15 ring-1 ring-blue-500/20 transition-transform duration-300 group-hover:scale-110">
                         <Video className="h-4.5 w-4.5 text-primary" aria-hidden="true" />
                       </div>
                       <div className="min-w-0 flex-1">
@@ -273,20 +331,25 @@ export default function HostDashboardPage() {
                   ))
                 )}
               </CardContent>
-            </Card>
+            </motion.div>
           </div>
 
           {/* Recent open tasks */}
           {data.recent_tasks.length > 0 && (
-            <Card>
-              <CardHeader>
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.38, ease: [0.16, 1, 0.3, 1] }}
+              className="glass glass-hover relative overflow-hidden rounded-xl"
+            >
+              <div className="p-6">
                 <CardTitle>Recent Tasks</CardTitle>
                 <CardDescription>Open action items from your latest meetings.</CardDescription>
-              </CardHeader>
-              <CardContent className="divide-y divide-border">
+              </div>
+              <CardContent className="divide-y divide-border/60">
                 {data.recent_tasks.map((task) => (
                   <div key={task.id} className="flex items-center gap-4 py-3.5 first:pt-0 last:pb-0">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent/70">
                       <CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true" />
                     </div>
                     <div className="min-w-0 flex-1">
@@ -312,7 +375,7 @@ export default function HostDashboardPage() {
                   </div>
                 ))}
               </CardContent>
-            </Card>
+            </motion.div>
           )}
         </>
       )}

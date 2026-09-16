@@ -17,18 +17,28 @@ export function AISection() {
   return (
     <section id="ai" className="relative overflow-hidden py-20 sm:py-28">
       <div
-        className="pointer-events-none absolute right-0 top-1/4 h-[380px] w-[380px] rounded-full bg-violet-500/10 blur-3xl"
+        className="pointer-events-none absolute right-0 top-1/4 h-[400px] w-[400px] rounded-full bg-violet-500/10 blur-3xl"
+        style={{ animation: "orb-drift 16s ease-in-out infinite" }}
+        aria-hidden="true"
+      />
+      <div
+        className="pointer-events-none absolute bottom-0 left-0 h-[320px] w-[320px] rounded-full bg-blue-500/10 blur-3xl"
+        style={{ animation: "orb-drift 20s ease-in-out -8s infinite" }}
         aria-hidden="true"
       />
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid items-center gap-12 lg:grid-cols-2">
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
+            initial={{ opacity: 0, x: -24 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           >
-            <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+            <span className="inline-flex items-center gap-2 rounded-full border border-violet/20 bg-violet-soft px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-violet">
+              <BrainCircuit className="h-3.5 w-3.5" aria-hidden="true" />
+              AI Engine
+            </span>
+            <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
               AI Intelligence That Understands Your Meetings
             </h2>
             <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
@@ -37,36 +47,38 @@ export function AISection() {
               ever reaches your database.
             </p>
 
-            <ul className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <div className="mt-8 flex flex-wrap gap-2">
               {EXTRACTIONS.map((item, index) => (
-                <motion.li
+                <motion.span
                   key={item}
                   initial={{ opacity: 0, y: 10 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.35, delay: 0.04 * index }}
-                  className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2.5 text-sm font-medium text-foreground"
+                  transition={{ duration: 0.35, delay: 0.04 * index, ease: [0.16, 1, 0.3, 1] }}
+                  className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:border-primary/40 hover:bg-primary/10"
                 >
                   <CheckCircle2 className="h-4 w-4 shrink-0 text-success" aria-hidden="true" />
                   {item}
-                </motion.li>
+                </motion.span>
               ))}
-            </ul>
+            </div>
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, y: 24 }}
+            initial={{ opacity: 0, y: 28 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.55, delay: 0.1 }}
+            transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
             className="space-y-4"
           >
-            <div className="rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)]">
+            <div className="gradient-border glass shine rounded-2xl p-6">
               <div className="mb-3 flex items-center gap-2">
-                <BrainCircuit className="h-5 w-5 text-primary" aria-hidden="true" />
+                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500/15 to-sky-500/15 ring-1 ring-blue-500/20">
+                  <BrainCircuit className="h-5 w-5 text-primary" aria-hidden="true" />
+                </span>
                 <h3 className="font-semibold text-foreground">Structured JSON, Validated Output</h3>
               </div>
-              <pre className="overflow-x-auto rounded-lg bg-muted/70 p-4 text-xs leading-relaxed text-muted-foreground">
+              <pre className="overflow-x-auto rounded-lg bg-muted/60 p-4 text-xs leading-relaxed text-muted-foreground shadow-inner">
                 <code>{`{
   "summary": "Meeting summary...",
   "key_points": ["Point one", "Point two"],
@@ -85,7 +97,7 @@ export function AISection() {
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="rounded-2xl border border-border bg-card p-5">
+              <div className="gradient-border glass glass-hover rounded-2xl p-5">
                 <GitMerge className="mb-2 h-5 w-5 text-violet" aria-hidden="true" />
                 <h3 className="text-sm font-semibold text-foreground">Context-Aware Person Matching</h3>
                 <p className="mt-1.5 text-sm text-muted-foreground">
@@ -94,7 +106,7 @@ export function AISection() {
                   confidence scores.
                 </p>
               </div>
-              <div className="rounded-2xl border border-border bg-card p-5">
+              <div className="gradient-border glass glass-hover rounded-2xl p-5">
                 <ShieldAlert className="mb-2 h-5 w-5 text-warning" aria-hidden="true" />
                 <h3 className="text-sm font-semibold text-foreground">Host Confirmation</h3>
                 <p className="mt-1.5 text-sm text-muted-foreground">
