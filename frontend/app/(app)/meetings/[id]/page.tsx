@@ -67,7 +67,7 @@ export default function MeetingDetailPage() {
   const [copied, setCopied] = useState(false);
 
   const speakerColors = useMemo(
-    () => ["bg-blue-500", "bg-sky-500", "bg-cyan-500", "bg-teal-500", "bg-indigo-500", "bg-violet-500", "bg-blue-600"],
+    () => ["bg-[#6366f1]", "bg-[#06b6d4]", "bg-[#8b5cf6]", "bg-[#34d399]", "bg-[#fbbf24]", "bg-[#a78bfa]", "bg-[#22d3ee]"],
     []
   );
 

@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt.token_blacklist",
     "corsheaders",
     # IntelliConnect apps
+    "ai",
     "accounts",
     "organizations",
     "people",
@@ -173,7 +174,10 @@ SIMPLE_JWT = {
 
 FRONTEND_ORIGINS = [
     o.strip()
-    for o in os.getenv("FRONTEND_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000").split(",")
+    for o in os.getenv(
+        "FRONTEND_ORIGINS",
+        "http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001",
+    ).split(",")
     if o.strip()
 ]
 CORS_ALLOWED_ORIGINS = FRONTEND_ORIGINS
@@ -224,6 +228,7 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
 CEREBRAS_API_KEY = os.getenv("CEREBRAS_API_KEY", "")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+NVIDIA_API_KEY = os.getenv("NVIDIA_API_KEY", "")
 
 # Models (configurable, sensible defaults per provider)
 GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
@@ -238,6 +243,25 @@ try:
 except (TypeError, ValueError):
     GEMINI_THINKING_BUDGET = None
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+# NVIDIA hosted NIM is stream-only. GLM-5.3-flash was chosen as the default
+# because it returns its first token ~3-4x faster than the larger nemotron
+# NIM on the same key (verified ~32s vs ~70-150s first byte in live tests).
+# Set NVIDIA_MODEL to another model id if a faster/smaller NIM appears.
+NVIDIA_MODEL = os.getenv("NVIDIA_MODEL", "z-ai/glm-5.3-flash")
+# Cap on completion tokens for NVIDIA NIM models. Analyses produce small
+# JSON (a few hundred tokens); the cap only bounds worst-case tail latency.
+NVIDIA_MAX_TOKENS = env_int("NVIDIA_MAX_TOKENS", 4096)
+# NVIDIA's hosted NIM endpoint queues requests before the first token —
+# often 60-150s on community keys, longer for large transcripts. The read
+# timeout must comfortably exceed that or every analysis fails. When set it
+# only applies to NVIDIA streaming reads, not the other providers.
+NVIDIA_STREAM_TIMEOUT_SECONDS = env_int("NVIDIA_STREAM_TIMEOUT_SECONDS", 300)
+# Keep a provider outage from leaving a meeting in "processing" indefinitely.
+AI_PROVIDER_TIMEOUT_SECONDS = env_int("AI_PROVIDER_TIMEOUT_SECONDS", 45)
+# A meeting can stay in "processing" only while a job thread is actually
+# running. A crashed/killed worker would otherwise leave it stuck forever;
+# past this age it is auto-repaired to "failed" (safe to retry).
+MEETING_PROCESSING_STALE_SECONDS = env_int("MEETING_PROCESSING_STALE_SECONDS", 1200)
 
 # Development-only deterministic provider. Never enabled in production
 # deployments; requires AI_ENABLE_DEMO=true explicitly.
@@ -301,3 +325,12 @@ EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", True)
 DEFAULT_FROM_EMAIL = os.getenv(
     "DEFAULT_FROM_EMAIL", "IntelliConnect <no-reply@intelliconnect.app>"
 )
+
+# ---------------------------------------------------------------------------
+# Task email notifications via Resend. Mails are only sent when an API key is
+# configured; RESEND_FROM must be a verified Resend "from" address.
+# ---------------------------------------------------------------------------
+
+RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
+RESEND_FROM = os.getenv("RESEND_FROM", "IntelliConnect <onboarding@resend.dev>")
+RESEND_ENABLED = bool(RESEND_API_KEY and RESEND_FROM.strip())

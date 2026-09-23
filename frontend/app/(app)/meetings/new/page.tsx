@@ -384,7 +384,7 @@ export default function NewMeetingPage() {
               <div className="space-y-2">
                 <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-blue-600 to-sky-500 transition-all duration-300"
+                    className="h-full rounded-full bg-gradient-to-r from-[#6366f1] to-[#06b6d4] transition-all duration-300"
                     style={{ width: `${uploadProgress}%` }}
                   />
                 </div>
@@ -406,7 +406,7 @@ export default function NewMeetingPage() {
 
 function SuccessIcon() {
   return (
-    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500/15 to-sky-500/15 ring-1 ring-blue-500/25">
+    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#6366f1]/15 to-[#06b6d4]/15 ring-1 ring-[#6366f1]/25">
       <CheckCircle2 className="h-8 w-8 text-success" aria-hidden="true" />
     </div>
   );

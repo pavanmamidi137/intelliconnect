@@ -19,6 +19,7 @@ class Organization(models.Model):
         choices=OrganizationType.choices,
         default=OrganizationType.COMPANY,
     )
+    custom_organization_type = models.CharField(max_length=100, blank=True, default="")
     description = models.TextField(blank=True, default="")
     website = models.URLField(blank=True, default="")
     created_at = models.DateTimeField(auto_now_add=True)

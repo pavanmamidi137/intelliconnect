@@ -15,11 +15,27 @@ class OrganizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Organization
         fields = [
-            "id", "name", "organization_type", "description", "website",
+            "id", "name", "organization_type", "custom_organization_type", "description", "website",
             "created_at", "people_count", "meetings_count",
             "completed_meetings", "open_tasks",
         ]
         read_only_fields = ["id", "created_at"]
+
+    def validate(self, attrs):
+        organization_type = attrs.get(
+            "organization_type",
+            self.instance.organization_type if self.instance else Organization.OrganizationType.COMPANY,
+        )
+        custom_type = attrs.get(
+            "custom_organization_type",
+            self.instance.custom_organization_type if self.instance else "",
+        ).strip()
+        if organization_type == Organization.OrganizationType.OTHER and not custom_type:
+            raise serializers.ValidationError(
+                {"custom_organization_type": "Enter your organization type."}
+            )
+        attrs["custom_organization_type"] = custom_type if organization_type == Organization.OrganizationType.OTHER else ""
+        return attrs
 
     def get_people_count(self, obj):
         return obj.people.count()

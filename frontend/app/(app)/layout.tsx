@@ -12,7 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 function ShellSkeleton() {
   return (
     <div className="flex min-h-screen">
-      <aside className="hidden w-64 shrink-0 border-r border-border bg-card/40 lg:block">
+      <aside className="hidden w-56 shrink-0 p-3 lg:block">
         <div className="space-y-4 p-4">
           <Skeleton className="h-9 w-40" />
           <div className="space-y-2">
@@ -23,7 +23,7 @@ function ShellSkeleton() {
         </div>
       </aside>
       <div className="flex-1">
-        <div className="flex h-16 items-center gap-4 border-b border-border px-6">
+        <div className="flex h-16 items-center gap-4 px-6">
           <Skeleton className="h-9 w-full max-w-md" />
           <Skeleton className="ml-auto h-9 w-9 rounded-full" />
         </div>

@@ -237,6 +237,109 @@ class PersonImportView(APIView):
         )
 
 
+class PersonBulkCreateView(APIView):
+    """Create many people at once from comma/newline-separated names.
+
+    Payload:
+      * ``names`` — either a string ("Ravi Kumar, Sana Verma\nMeera") or a
+        list of name strings. Splits both commas and newlines.
+      * ``department`` / ``designation`` (optional) — applied to every person
+        created in this request.
+
+    Blank names are dropped. Repeats within the same request are skipped and
+    reported (the organization model allows duplicate first/middle names, but
+    a single paste should not create two identical entries on accident).
+    """
+
+    MAX_NAMES = 500
+
+    def post(self, request):
+        data = request.data or {}
+        raw = data.get("names")
+        if isinstance(raw, list):
+            names = [str(n).strip() for n in raw]
+        elif isinstance(raw, str):
+            names = [
+                part.strip()
+                for part in re.split(r"[\n,]+", raw)
+                if part.strip()
+            ]
+        else:
+            raise ApplicationError(
+                "Provide a comma-separated list of names."
+            )
+        names = [n for n in names if n]
+        if not names:
+            raise ApplicationError("No names provided to add.")
+
+        if len(names) > self.MAX_NAMES:
+            raise FileValidationError(
+                f"Too many names in one request (max {self.MAX_NAMES})."
+            )
+
+        organization = request.user.organization
+        if organization is None:
+            raise ApplicationError("You must belong to an organization first.")
+
+        department = (data.get("department") or "").strip()
+        designation = (data.get("designation") or "").strip()
+
+        created = 0
+        skipped = []
+        seen = set()
+        for name in names:
+            key = name.lower()
+            if key in seen:
+                skipped.append(f"{name}: duplicate in request")
+                continue
+            seen.add(key)
+            Person.objects.create(
+                organization=organization,
+                full_name=name,
+                department=department,
+                designation=designation,
+            )
+            created += 1
+
+        return Response(
+            {
+                "created": created,
+                "skipped": len(skipped),
+                "skipped_details": skipped[:25],
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class PersonBulkDeleteView(APIView):
+    """Delete many people at once. Only people in the caller's organization
+    are removed; unknown or foreign ids are silently ignored."""
+
+    def post(self, request):
+        data = request.data or {}
+        raw_ids = data.get("ids")
+        if not isinstance(raw_ids, list) or not raw_ids:
+            raise ApplicationError("Provide at least one person id to remove.")
+
+        if len(raw_ids) > 500:
+            raise FileValidationError("Too many ids in one request (max 500).")
+
+        organization = request.user.organization
+        if organization is None:
+            raise ApplicationError("You must belong to an organization first.")
+
+        ids = []
+        for raw in raw_ids:
+            try:
+                ids.append(uuid.UUID(str(raw)))
+            except (ValueError, AttributeError, TypeError):
+                continue
+
+        queryset = Person.objects.filter(organization=organization, id__in=ids)
+        deleted, _ = queryset.delete()
+        return Response({"deleted": deleted})
+
+
 class PersonFacetsView(APIView):
     """Distinct departments / designations for filter dropdowns."""
 

@@ -1,4 +1,5 @@
 from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.mixins import (
     CreateModelMixin,
     DestroyModelMixin,
@@ -13,6 +14,7 @@ from meetings.models import Meeting
 from people.models import Person
 
 from .models import Task
+from .notifications import send_task_notification
 from .serializers import TaskSerializer
 
 
@@ -98,6 +100,7 @@ class TaskViewSet(
             context=(request.data.get("context") or "").strip(),
             source=Task.Source.MANUAL,
         )
+        send_task_notification(task)
         return Response(
             TaskSerializer(task, context={"request": request}).data,
             status=status.HTTP_201_CREATED,
@@ -105,6 +108,7 @@ class TaskViewSet(
 
     def partial_update(self, request, *args, **kwargs):
         task = self.get_object()
+        previous_person_id = task.person.id if task.person else None
         allowed = ["task", "deadline", "priority", "status", "context", "person", "mentioned_name"]
         for field in allowed:
             if field in request.data:
@@ -129,9 +133,37 @@ class TaskViewSet(
                 else:
                     setattr(task, field, request.data[field])
         task.save()
+        send_task_notification(task, previous_person_id=previous_person_id, previous_confidence=task.ai_confidence)
         return Response(TaskSerializer(task, context={"request": request}).data)
 
     def destroy(self, request, *args, **kwargs):
         task = self.get_object()
         task.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=["post"], url_path="resend-email")
+    def resend_email(self, request, *args, **kwargs):
+        """Force a task-notification email re-send (used from the Failed → Retry action)."""
+        task = self.get_object()
+        if task.person is None or not (task.person.email or "").strip():
+            return Response(
+                {
+                    "error": True,
+                    "code": "no_assignee_email",
+                    "detail": "This task has no assignee email to send to.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        previous_person_id = str(task.person.id) if task.person else None
+        sent = send_task_notification(
+            task,
+            previous_person_id=previous_person_id,
+            previous_confidence=task.ai_confidence,
+        )
+        task.refresh_from_db()
+        return Response(
+            {
+                "sent": sent,
+                "task": TaskSerializer(task, context={"request": request}).data,
+            }
+        )

@@ -50,10 +50,10 @@ export function contrastText(hex: string): string {
  * be partially customized.
  */
 export function buildThemeVars(theme: SiteTheme): Record<string, string> {
-  const primary = theme.primary_color || "#2563eb";
-  const accent = theme.accent_color || "#0ea5e9";
-  const lightBg = theme.light_background || "#ffffff";
-  const darkBg = theme.dark_background || "#0b1120";
+  const primary = theme.primary_color || "#6366f1";
+  const accent = theme.accent_color || "#8b5cf6";
+  const lightBg = theme.light_background || "#f6f8fc";
+  const darkBg = theme.dark_background || "#030508";
   const radius = theme.radius || "0.75rem";
 
   const lightAccentBg = mixHex(primary, "#ffffff", 0.93);
@@ -95,8 +95,8 @@ export function buildThemeVars(theme: SiteTheme): Record<string, string> {
 }
 
 const FONT_CSS: Record<string, string> = {
-  default: `var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif`,
-  system: `system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif`,
+  default: `"Avenir Next", "Segoe UI", sans-serif`,
+  system: `"Avenir Next", "Segoe UI", sans-serif`,
   serif: `Georgia, "Times New Roman", "Noto Serif", serif`,
   mono: `ui-monospace, "Cascadia Code", "SF Mono", Consolas, "Liberation Mono", monospace`,
 };

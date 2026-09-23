@@ -83,8 +83,8 @@ export const meetingsService = {
     return api.delete<void>(`/meetings/${id}/`);
   },
 
-  async process(id: string) {
-    return api.post<{ detail: string; status: string }>(`/meetings/${id}/process/`);
+  async process(id: string, force = false) {
+    return api.post<{ detail: string; status: string }>(`/meetings/${id}/process/`, force ? { force: true } : undefined);
   },
 
   /** Cheap status + pipeline stage — used by the processing screen poll. */
@@ -100,6 +100,13 @@ export const meetingsService = {
     return api.post<{
       detail: string;
       report_id?: string;
+      email_results?: {
+        task: string;
+        person: string | null;
+        email: string | null;
+        sent: boolean;
+        reason: string;
+      }[];
       meeting?: MeetingDetail;
     }>(`/meetings/${id}/generate-report/`, edits);
   },
@@ -123,5 +130,8 @@ export const tasksService = {
   },
   async remove(id: string) {
     return api.delete<void>(`/tasks/${id}/`);
+  },
+  async resendEmail(id: string) {
+    return api.post<{ sent: boolean; task: Task }>(`/tasks/${id}/resend-email/`);
   },
 };

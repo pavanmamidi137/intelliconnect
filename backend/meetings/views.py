@@ -1,6 +1,6 @@
 import logging
 import threading
-from datetime import date
+from datetime import date, timedelta
 
 from django.conf import settings
 from django.db.models import Q
@@ -21,6 +21,7 @@ from config.exceptions import ApplicationError, NotFoundError, StorageError
 from reports.models import MeetingReport
 from storage import get_storage
 from tasks.models import Task
+from tasks.notifications import send_task_notification
 
 from .jobs import analyze_meeting_job, dispatch_async, generate_report_job, run_sync_or_dispatch
 from .models import (
@@ -37,6 +38,27 @@ from .serializers import (
 )
 
 logger = logging.getLogger("intelliconnect")
+
+
+def _repair_stale_processing(queryset):
+    """Mark meetings whose background job has silently died as failed.
+
+    A job thread can be killed without updating the row (worker restart,
+    crashed process), leaving a meeting "processing" forever. Any row that
+    has held that status past the stale threshold is unrecoverable: its
+    analysis will never write results. Flip it to failed so the UI offers
+    retry instead of waiting indefinitely.
+    """
+    stale_cutoff = timezone.now() - timedelta(
+        seconds=settings.MEETING_PROCESSING_STALE_SECONDS
+    )
+    queryset.filter(
+        status=Meeting.Status.PROCESSING, updated_at__lt=stale_cutoff
+    ).update(
+        status=Meeting.Status.FAILED,
+        processing_stage=None,
+        updated_at=timezone.now(),
+    )
 
 
 class _OrganizationScoped:
@@ -72,6 +94,7 @@ class MeetingViewSet(
 
     # ------------------------------------------------------------- list
     def list(self, request, *args, **kwargs):
+        _repair_stale_processing(self.get_queryset())
         queryset = self.get_queryset()
 
         search = request.query_params.get("search", "").strip()
@@ -177,10 +200,14 @@ class MeetingProcessView(APIView):
     def post(self, request, id):
         meeting = self._get_meeting(request, id)
         if meeting.status == Meeting.Status.PROCESSING:
-            return Response(
-                {"detail": "This meeting is already being analyzed."},
-                status=status.HTTP_409_CONFLICT,
-            )
+            if not request.data.get("force"):
+                return Response(
+                    {"detail": "This meeting is already being analyzed."},
+                    status=status.HTTP_409_CONFLICT,
+                )
+            meeting.status = Meeting.Status.FAILED
+            meeting.processing_stage = None
+            meeting.save(update_fields=["status", "processing_stage", "updated_at"])
         if not meeting.transcript_path:
             raise ApplicationError("This meeting has no transcript to analyze.")
         if meeting.status == Meeting.Status.COMPLETED and not request.data.get("force"):
@@ -204,6 +231,8 @@ class MeetingProcessView(APIView):
             raise NotFoundError("Meeting not found.")
         if meeting.organization_id != request.user.organization_id:
             raise NotFoundError("You don't have permission to access this meeting.")
+        _repair_stale_processing(Meeting.objects.filter(id=meeting.id))
+        meeting.refresh_from_db()
         return meeting
 
 
@@ -265,7 +294,7 @@ class MeetingGenerateReportView(APIView):
         self._apply_summary(meeting, data)
         self._apply_key_points(meeting, data)
         self._apply_decisions(meeting, data)
-        self._apply_tasks(meeting, data)
+        email_specs = self._apply_tasks(meeting, data)
 
         meeting.save(update_fields=["title", "meeting_date", "notes", "updated_at"])
 
@@ -277,25 +306,37 @@ class MeetingGenerateReportView(APIView):
                 "We couldn't generate this report. Please try again."
             ) from exc
 
+        # Emails go out AFTER the report exists so the PDF can ride along.
+        # (In async/worker mode generate_report returns None and the report
+        # isn't ready yet — those sends go out without the PDF.)
+        email_results = self._send_task_emails(email_specs)
+        sent = sum(1 for r in email_results if r["sent"])
+        if email_results:
+            logger.info(
+                "Confirm & generate for %s: %d/%d task emails sent",
+                meeting.id,
+                sent,
+                len(email_results),
+            )
+
+        response_payload = {
+            "detail": "Report generated successfully.",
+            "email_results": email_results,
+        }
         if report is None:
             # Dispatched to a worker — report will be generated asynchronously.
-            return Response(
-                {"detail": "Report generation started."},
-                status=status.HTTP_202_ACCEPTED,
-            )
+            response_payload["detail"] = "Report generation started."
+            response_payload["email_results"] = email_results
+            return Response(response_payload, status=status.HTTP_202_ACCEPTED)
 
         # generate_report saved pdf_path on its own instance — refresh so the
         # serialized response reflects the freshly stored PDF.
         meeting.refresh_from_db()
-        return Response(
-            {
-                "detail": "Report generated successfully.",
-                "report_id": str(report.id),
-                "meeting": MeetingDetailSerializer(
-                    meeting, context={"request": request}
-                ).data,
-            }
-        )
+        response_payload["report_id"] = str(report.id)
+        response_payload["meeting"] = MeetingDetailSerializer(
+            meeting, context={"request": request}
+        ).data
+        return Response(response_payload)
 
     def _apply_summary(self, meeting, data):
         if "summary" not in data and "paragraph_summary" not in data:
@@ -332,8 +373,15 @@ class MeetingGenerateReportView(APIView):
                 Decision.objects.create(meeting=meeting, content=text)
 
     def _apply_tasks(self, meeting, data):
+        """Persist the host's task edits and return email send-specs.
+
+        Emails are intentionally NOT sent here: they are sent in
+        _send_task_emails() after the report PDF exists so the PDF can be
+        attached. Assemble a spec so the send keeps knowledge of the
+        previous assignee/confidence (needed for dedupe + result reasons).
+        """
         if "tasks" not in data:
-            return
+            return []
         values = data.get("tasks")
         if not isinstance(values, list):
             raise ApplicationError("tasks must be a list of objects.")
@@ -344,6 +392,7 @@ class MeetingGenerateReportView(APIView):
         valid_ids = {item.get("id") for item in values if item.get("id")}
         meeting.tasks.exclude(id__in=valid_ids).delete()
 
+        specs = []
         for item in values:
             task_id = item.get("id")
             person_id = item.get("person")
@@ -365,11 +414,87 @@ class MeetingGenerateReportView(APIView):
                 payload["person_id"] = person_id
 
             if task_id:
-                Task.objects.filter(id=task_id, meeting=meeting).update(**payload)
+                task = Task.objects.filter(id=task_id, meeting=meeting).first()
+                if task is None:
+                    continue
+                previous_person_id = task.person.id if task.person else None
+                previous_confidence = task.ai_confidence
+                for key, value in payload.items():
+                    if key == "person_id":
+                        task.person = meeting.organization.people.filter(
+                            id=value
+                        ).first()
+                    else:
+                        setattr(task, key, value)
+                task.save()
+                specs.append(
+                    {
+                        "task": task,
+                        "previous_person_id": previous_person_id,
+                        "previous_confidence": previous_confidence,
+                    }
+                )
             else:
                 payload["meeting"] = meeting
                 payload["mentioned_name"] = str(item.get("mentioned_name", "")).strip()
-                Task.objects.create(source=Task.Source.MANUAL, **payload)
+                task = Task.objects.create(source=Task.Source.MANUAL, **payload)
+                specs.append(
+                    {"task": task, "previous_person_id": None, "previous_confidence": None}
+                )
+        return specs
+
+    def _send_task_emails(self, specs):
+        """Send assignment emails post-report. Each spec carries the task and
+        its previous assignee/confidence so dedupe + result reasons stay accurate."""
+        email_results = []
+        for spec in specs:
+            task = spec["task"]
+            previous_person_id = spec.get("previous_person_id")
+            previous_confidence = spec.get("previous_confidence")
+            sent = send_task_notification(
+                task,
+                previous_person_id=previous_person_id,
+                previous_confidence=previous_confidence,
+            )
+            email_results.append(
+                self._email_result(task, sent, previous_person_id, previous_confidence)
+            )
+        return email_results
+
+    def _email_result(self, task, sent, previous_person_id, previous_confidence):
+        person = task.person
+        if person is None:
+            return {
+                "task": task.task[:80],
+                "person": None,
+                "email": None,
+                "sent": False,
+                "reason": "unassigned",
+            }
+        if not person.email:
+            return {
+                "task": task.task[:80],
+                "person": person.full_name,
+                "email": None,
+                "sent": False,
+                "reason": "no_email_on_file",
+            }
+        if previous_person_id == str(person.id) and task.notified_at is not None:
+            return {
+                "task": task.task[:80],
+                "person": person.full_name,
+                "email": person.email,
+                "sent": False,
+                "reason": "already_notified",
+            }
+        return {
+            "task": task.task[:80],
+            "person": person.full_name,
+            "email": person.email,
+            "sent": sent,
+            "reason": "sent" if sent else "send_failed",
+            "email_status": task.email_status,
+        }
 
 
 class MeetingTranscriptView(APIView):

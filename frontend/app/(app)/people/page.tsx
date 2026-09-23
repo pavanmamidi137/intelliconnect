@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import {
   ChevronLeft,
   ChevronRight,
+  ListPlus,
   Mail,
   MoreHorizontal,
   Pencil,
@@ -24,9 +25,11 @@ import { ErrorState } from "@/components/shared/error-state";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { PersonFormDialog } from "@/components/people/person-form-dialog";
 import { ImportPeopleDialog } from "@/components/people/import-people-dialog";
+import { BulkAddPeopleDialog } from "@/components/people/bulk-add-people-dialog";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -64,8 +67,12 @@ export default function PeoplePage() {
   const [formOpen, setFormOpen] = useState(false);
   const [editingPerson, setEditingPerson] = useState<Person | null>(null);
   const [importOpen, setImportOpen] = useState(false);
+  const [bulkAddOpen, setBulkAddOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Person | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
 
   const filters = useMemo(
     () => ({
@@ -77,6 +84,12 @@ export default function PeoplePage() {
     }),
     [debouncedSearch, department, designation, status, page]
   );
+
+  /* eslint-disable react-hooks/set-state-in-effect -- reset selection when filters change */
+  useEffect(() => {
+    setSelected(new Set());
+  }, [debouncedSearch, department, designation, status, page]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const peopleQuery = useQuery({
     queryKey: ["people", filters],
@@ -109,10 +122,53 @@ export default function PeoplePage() {
     }
   };
 
+  const toggleSelect = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const confirmBulkDelete = async () => {
+    if (selected.size === 0) return;
+    setBulkDeleting(true);
+    try {
+      const ids = Array.from(selected);
+      const result = await peopleService.bulkRemove(ids);
+      toast.success(`${result.deleted} ${pluralize(result.deleted, "person", "people")} removed.`);
+      setSelected(new Set());
+      setBulkDeleteOpen(false);
+      refresh();
+    } catch (error) {
+      toast.error(getErrorMessage(error, "We couldn't remove the selected people."));
+    } finally {
+      setBulkDeleting(false);
+    }
+  };
+
   const data = peopleQuery.data;
   const people = data?.results ?? [];
   const loading = peopleQuery.isLoading;
   const error = peopleQuery.error as Error | null;
+
+  const allVisibleSelected = people.length > 0 && people.every((person) => selected.has(person.id));
+
+  const toggleSelectAll = () => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (allVisibleSelected) {
+        people.forEach((person) => next.delete(person.id));
+      } else {
+        people.forEach((person) => next.add(person.id));
+      }
+      return next;
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -124,6 +180,10 @@ export default function PeoplePage() {
             <Button variant="outline" onClick={() => setImportOpen(true)}>
               <Upload aria-hidden="true" />
               Import People
+            </Button>
+            <Button variant="outline" onClick={() => setBulkAddOpen(true)}>
+              <ListPlus aria-hidden="true" />
+              Add Multiple
             </Button>
             <Button
               variant="gradient"
@@ -197,6 +257,23 @@ export default function PeoplePage() {
         </div>
       </div>
 
+      {selected.size > 0 && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-danger/30 bg-danger/5 px-4 py-2.5">
+          <p className="text-sm font-medium text-foreground">
+            {selected.size} {pluralize(selected.size, "person", "people")} selected
+          </p>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" onClick={() => setSelected(new Set())}>
+              Clear
+            </Button>
+            <Button variant="destructive" size="sm" onClick={() => setBulkDeleteOpen(true)}>
+              <Trash2 aria-hidden="true" className="h-4 w-4" />
+              Delete Selected
+            </Button>
+          </div>
+        </div>
+      )}
+
       {error && <ErrorState message={error.message} onRetry={() => peopleQuery.refetch()} />}
 
       {/* Loading skeletons */}
@@ -230,6 +307,13 @@ export default function PeoplePage() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-10">
+                    <Checkbox
+                      checked={allVisibleSelected}
+                      onCheckedChange={toggleSelectAll}
+                      aria-label="Select all people on this page"
+                    />
+                  </TableHead>
                   <TableHead>Person</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Department</TableHead>
@@ -247,6 +331,13 @@ export default function PeoplePage() {
                     className="cursor-pointer"
                     onClick={() => router.push(`/people/${person.id}`)}
                   >
+                    <TableCell className="w-10" onClick={(e) => e.stopPropagation()}>
+                      <Checkbox
+                        checked={selected.has(person.id)}
+                        onCheckedChange={() => toggleSelect(person.id)}
+                        aria-label={`Select ${person.full_name}`}
+                      />
+                    </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <Avatar className="h-9 w-9">
@@ -317,32 +408,42 @@ export default function PeoplePage() {
           {/* Mobile cards */}
           <div className="space-y-3 md:hidden">
             {people.map((person) => (
-              <button
-                key={person.id}
-                type="button"
-                onClick={() => router.push(`/people/${person.id}`)}
-                className="glass glass-hover w-full rounded-xl p-4 text-left transition-shadow active:scale-[0.99]"
-              >
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-10 w-10">
-                    <AvatarFallback>{initials(person.full_name)}</AvatarFallback>
-                  </Avatar>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium text-foreground">{person.full_name}</p>
-                    <p className="truncate text-xs text-muted-foreground">
-                      {person.department || "No department"}
-                      {person.designation ? ` · ${person.designation}` : ""}
-                    </p>
-                  </div>
-                  <Badge variant={person.is_active ? "success" : "secondary"}>
-                    {person.is_active ? "Active" : "Inactive"}
-                  </Badge>
+              <div key={person.id} className="glass glass-hover rounded-xl p-4 transition-shadow">
+                <div className="flex items-start gap-3">
+                  <span className="pt-1">
+                    <Checkbox
+                      checked={selected.has(person.id)}
+                      onCheckedChange={() => toggleSelect(person.id)}
+                      aria-label={`Select ${person.full_name}`}
+                    />
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => router.push(`/people/${person.id}`)}
+                    className="min-w-0 flex-1 text-left"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-10 w-10">
+                        <AvatarFallback>{initials(person.full_name)}</AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-medium text-foreground">{person.full_name}</p>
+                        <p className="truncate text-xs text-muted-foreground">
+                          {person.department || "No department"}
+                          {person.designation ? ` · ${person.designation}` : ""}
+                        </p>
+                      </div>
+                      <Badge variant={person.is_active ? "success" : "secondary"}>
+                        {person.is_active ? "Active" : "Inactive"}
+                      </Badge>
+                    </div>
+                    <div className="mt-3 flex items-center gap-4 border-t border-border pt-3 text-xs text-muted-foreground">
+                      <span>{person.email || "No email"}</span>
+                      <span className="ml-auto">{person.meetings_count} meetings · {person.tasks_count} tasks</span>
+                    </div>
+                  </button>
                 </div>
-                <div className="mt-3 flex items-center gap-4 border-t border-border pt-3 text-xs text-muted-foreground">
-                  <span>{person.email || "No email"}</span>
-                  <span className="ml-auto">{person.meetings_count} meetings · {person.tasks_count} tasks</span>
-                </div>
-              </button>
+              </div>
             ))}
           </div>
 
@@ -387,6 +488,16 @@ export default function PeoplePage() {
         person={editingPerson}
       />
       <ImportPeopleDialog open={importOpen} onOpenChange={setImportOpen} onImported={refresh} />
+      <BulkAddPeopleDialog open={bulkAddOpen} onOpenChange={setBulkAddOpen} onAdded={refresh} />
+      <ConfirmDialog
+        open={bulkDeleteOpen}
+        onOpenChange={(open) => !open && setBulkDeleteOpen(false)}
+        title={`Remove ${selected.size} ${pluralize(selected.size, "person", "people")}?`}
+        description="The selected people will be removed from your organization. Their assigned tasks will be unassigned. This can't be undone."
+        confirmLabel="Remove Selected"
+        loading={bulkDeleting}
+        onConfirm={confirmBulkDelete}
+      />
       <ConfirmDialog
         open={Boolean(deleteTarget)}
         onOpenChange={(open) => !open && setDeleteTarget(null)}

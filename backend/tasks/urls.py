@@ -13,4 +13,9 @@ urlpatterns = [
         ),
         name="tasks-detail",
     ),
+    path(
+        "tasks/<uuid:id>/resend-email/",
+        TaskViewSet.as_view({"post": "resend_email"}),
+        name="tasks-resend-email",
+    ),
 ]

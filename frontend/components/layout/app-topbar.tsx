@@ -56,7 +56,7 @@ export function AppTopbar({ onMenuClick }: AppTopbarProps) {
   );
 
   return (
-    <header className="glass-strong sticky top-0 z-40 flex h-16 items-center gap-3 border-x-0 border-t-0 px-4 sm:px-6">
+    <header className="sticky top-0 z-40 flex h-16 items-center gap-3 bg-background/40 px-4 backdrop-blur-xl sm:px-6">
       <button
         type="button"
         onClick={onMenuClick}
@@ -76,7 +76,7 @@ export function AppTopbar({ onMenuClick }: AppTopbarProps) {
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search meetings…"
               aria-label="Search meetings"
-              className="h-9 w-full rounded-lg border border-input bg-muted/40 pl-9 pr-3 text-sm placeholder:text-muted-foreground transition-all duration-300 focus:border-primary/50 focus:bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="h-9 w-full rounded-full border border-input bg-muted/40 pl-9 pr-3 text-sm placeholder:text-muted-foreground transition-all duration-300 focus:border-primary/50 focus:bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
           </div>
         </form>

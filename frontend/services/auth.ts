@@ -8,6 +8,7 @@ export interface RegisterPayload {
   confirm_password: string;
   organization_name: string;
   organization_type: string;
+  custom_organization_type: string;
   designation: string;
   department: string;
 }

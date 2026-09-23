@@ -12,6 +12,7 @@ import {
   FileText,
   Loader2,
   RefreshCw,
+  Timer,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -39,6 +40,7 @@ export default function ProcessingPage() {
   const [statusInfo, setStatusInfo] = useState<MeetingStatusInfo | null>(null);
   const [failed, setFailed] = useState(false);
   const [retrying, setRetrying] = useState(false);
+  const [elapsed, setElapsed] = useState(0);
   const startedRef = useRef(false);
 
   useEffect(() => {
@@ -91,16 +93,24 @@ export default function ProcessingPage() {
     };
 
     poll();
+    const tick = setInterval(() => setElapsed((s) => s + 1), 1000);
     return () => {
       cancelled = true;
       if (timer) clearTimeout(timer);
+      clearInterval(tick);
     };
   }, [id, router]);
+
+  const elapsedMinutes = Math.floor(elapsed / 60);
+  const elapsedSeconds = elapsed % 60;
+  const elapsedLabel = elapsedMinutes > 0
+    ? `${elapsedMinutes}m ${elapsedSeconds}s`
+    : `${elapsedSeconds}s`;
 
   const retry = async () => {
     setRetrying(true);
     try {
-      await meetingsService.process(id);
+      await meetingsService.process(id, true);
       setFailed(false);
       setStatusInfo(null);
       toast.info("Analysis restarted.");
@@ -125,7 +135,7 @@ export default function ProcessingPage() {
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.4 }}
-          className="relative mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-blue-600 to-sky-500 shadow-[var(--shadow-glow)]"
+          className="relative mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-[#6366f1] to-[#06b6d4] shadow-[var(--shadow-glow)]"
         >
           <motion.span
             aria-hidden="true"
@@ -222,9 +232,16 @@ export default function ProcessingPage() {
       )}
 
       {!failed && (
-        <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-          <FileText className="h-3.5 w-3.5" aria-hidden="true" />
-          Your transcript · This page updates automatically
+        <div className="flex items-center justify-center gap-3 text-xs text-muted-foreground">
+          <span className="inline-flex items-center gap-1.5 font-medium text-primary">
+            <Timer className="h-3.5 w-3.5" aria-hidden="true" />
+            {elapsedLabel}
+          </span>
+          <span aria-hidden="true">·</span>
+          <span className="inline-flex items-center gap-1.5">
+            <FileText className="h-3.5 w-3.5" aria-hidden="true" />
+            Your transcript · This page updates automatically
+          </span>
           <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
         </div>
       )}

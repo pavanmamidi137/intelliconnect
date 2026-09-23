@@ -91,7 +91,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const cachedUser = readUserCache();
       if (cachedUser) {
         setUser(cachedUser);
-        setLoading(false);
       }
     }
     hydrate();

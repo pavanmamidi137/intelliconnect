@@ -17,7 +17,7 @@ function systemTheme(): "light" | "dark" {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("system");
+  const [theme, setTheme] = useState<Theme>("light");
 
   /* eslint-disable react-hooks/set-state-in-effect -- restore persisted UI preference after hydration */
   useEffect(() => {

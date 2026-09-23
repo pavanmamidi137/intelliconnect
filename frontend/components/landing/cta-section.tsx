@@ -15,26 +15,16 @@ export function CTASection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="gradient-border relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 via-blue-600 to-sky-600 px-6 py-14 text-center shadow-[var(--shadow-glow)] sm:px-16 sm:py-20"
+          className="gradient-border aurora relative overflow-hidden rounded-[2.5rem] px-6 py-14 text-center shadow-[var(--shadow-glow)] sm:px-16 sm:py-20"
         >
-          {/* animated gradient mesh overlay */}
+          {/* floating light accents */}
           <div
-            className="absolute inset-0 opacity-50"
-            style={{
-              background:
-                "linear-gradient(120deg, rgba(59,130,246,.35), rgba(14,165,233,.2), rgba(234,88,12,.12), rgba(59,130,246,.3))",
-              backgroundSize: "300% 300%",
-              animation: "gradient-shift 10s ease infinite",
-            }}
-            aria-hidden="true"
-          />
-          <div
-            className="pointer-events-none absolute -left-24 -top-24 h-64 w-64 rounded-full bg-blue-300/30 blur-3xl"
+            className="pointer-events-none absolute -left-24 -top-24 h-64 w-64 rounded-full bg-white/25 blur-3xl"
             style={{ animation: "float 7s ease-in-out infinite" }}
             aria-hidden="true"
           />
           <div
-            className="pointer-events-none absolute -bottom-24 -right-24 h-64 w-64 rounded-full bg-sky-300/25 blur-3xl"
+            className="pointer-events-none absolute -bottom-24 -right-24 h-64 w-64 rounded-full bg-cyan-300/25 blur-3xl"
             style={{ animation: "float 9s ease-in-out 1s infinite" }}
             aria-hidden="true"
           />
@@ -61,7 +51,7 @@ export function CTASection() {
               <Button
                 asChild
                 size="lg"
-                className="group bg-white text-blue-700 shadow-[0_10px_30px_-8px_rgba(255,255,255,0.5)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-blue-50"
+                className="group bg-white text-indigo-700 shadow-[0_10px_30px_-8px_rgba(255,255,255,0.5)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-indigo-50"
               >
                 <Link href="/register">
                   Get Started Free

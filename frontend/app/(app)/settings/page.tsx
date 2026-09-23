@@ -212,14 +212,15 @@ function OrganizationSettings() {
   const [form, setForm] = useState<{
     name: string;
     organization_type: Organization["organization_type"];
+    custom_organization_type: string;
     website: string;
     description: string;
-  }>({ name: "", organization_type: "company", website: "", description: "" });
+  }>({ name: "", organization_type: "company", custom_organization_type: "", website: "", description: "" });
   const [initialized, setInitialized] = useState(false);
 
   const org = orgQuery.data;
   if (org && !initialized) {
-    setForm({ name: org.name, organization_type: org.organization_type, website: org.website, description: org.description });
+    setForm({ name: org.name, organization_type: org.organization_type, custom_organization_type: org.custom_organization_type, website: org.website, description: org.description });
     setInitialized(true);
   }
 
@@ -275,6 +276,12 @@ function OrganizationSettings() {
               ))}
             </Select>
           </div>
+          {form.organization_type === "other" && (
+            <div className="space-y-2">
+              <Label htmlFor="set-org-custom-type">Custom Organization Type</Label>
+              <Input id="set-org-custom-type" value={form.custom_organization_type} onChange={(e) => setForm((f) => ({ ...f, custom_organization_type: e.target.value }))} placeholder="e.g. Research Collective" />
+            </div>
+          )}
           <div className="space-y-2">
             <Label htmlFor="set-org-website">Website</Label>
             <Input id="set-org-website" type="url" value={form.website} onChange={(e) => setForm((f) => ({ ...f, website: e.target.value }))} />

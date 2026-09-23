@@ -2,86 +2,143 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* --- IntelliConnect design tokens ---
+  The default surface is a bright, airy glass canvas with indigo / cyan /
+  purple accents. The explicit dark class keeps the command-center variant. */
+
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  --bg-dark: #f6f8fc;
+  --bg-card: rgba(255, 255, 255, 0.68);
+  --bg-card-border: rgba(99, 102, 241, 0.14);
+  --accent-indigo: #6366f1;
+  --accent-cyan: #06b6d4;
+  --accent-purple: #8b5cf6;
+  --text-primary: #172033;
+  --text-secondary: #647089;
+  --glow-color: rgba(99, 102, 241, 0.18);
 
-  --card: #ffffff;
-  --card-foreground: #0f172a;
+  --background: var(--bg-dark);
+  --foreground: var(--text-primary);
 
-  --popover: #ffffff;
-  --popover-foreground: #0f172a;
+  --card: var(--bg-card);
+  --card-foreground: var(--text-primary);
 
-  --primary: #2563eb;
+  --popover: rgba(255, 255, 255, 0.9);
+  --popover-foreground: var(--text-primary);
+
+  --primary: var(--accent-indigo);
   --primary-foreground: #ffffff;
 
-  --secondary: #f1f5f9;
-  --secondary-foreground: #1e293b;
+  --secondary: #eef1fb;
+  --secondary-foreground: #25304a;
 
-  --muted: #f1f5f9;
-  --muted-foreground: #64748b;
+  --muted: #edf1f8;
+  --muted-foreground: var(--text-secondary);
 
-  --accent: #eff6ff;
-  --accent-foreground: #1e40af;
+  --accent: #ecebff;
+  --accent-foreground: #4f46e5;
 
-  --violet: #0ea5e9;
-  --violet-soft: #f0f9ff;
-
-  --success: #059669;
-  --success-soft: #ecfdf5;
-  --warning: #b45309;
-  --warning-soft: #fffbeb;
-  --danger: #dc2626;
-  --danger-soft: #fef2f2;
-
-  --border: #e2e8f0;
-  --input: #e2e8f0;
-  --ring: #3b82f6;
-
-  --radius: 0.75rem;
-
-  --accent-cta: #ea580c;
-  --accent-cta-soft: #fff7ed;
-}
-
-.dark {
-  --background: #0b1120;
-  --foreground: #e2e8f0;
-
-  --card: #0f172a;
-  --card-foreground: #e2e8f0;
-
-  --popover: #0f172a;
-  --popover-foreground: #e2e8f0;
-
-  --primary: #3b82f6;
-  --primary-foreground: #ffffff;
-
-  --secondary: #1e293b;
-  --secondary-foreground: #cbd5e1;
-
-  --muted: #1e293b;
-  --muted-foreground: #94a3b8;
-
-  --accent: #172554;
-  --accent-foreground: #bfdbfe;
-
-  --violet: #38bdf8;
-  --violet-soft: #082f49;
+  --violet: var(--accent-purple);
+  --violet-soft: #f2efff;
 
   --success: #34d399;
-  --success-soft: #064e3b;
+  --success-soft: #e4f8ef;
   --warning: #fbbf24;
-  --warning-soft: #451a03;
+  --warning-soft: #fff5dd;
   --danger: #f87171;
-  --danger-soft: #450a0a;
+  --danger-soft: #ffebed;
 
-  --border: #1e293b;
-  --input: #1e293b;
-  --ring: #60a5fa;
+  --border: var(--bg-card-border);
+  --input: #d9deeb;
+  --ring: #6366f1;
 
-  --accent-cta: #f97316;
-  --accent-cta-soft: #431407;
+  --radius: 1rem;
+
+  --accent-cta: var(--accent-cyan);
+  --accent-cta-soft: #e4f7fb;
+}
+
+/* Explicit dark class shares the base navy theme (nice for pre-hydration
+   consistency and for callers that set the class directly). */
+.dark {
+  --background: #030508;
+  --foreground: #f8fafc;
+
+  --card: rgba(14, 18, 28, 0.78);
+  --card-foreground: #f8fafc;
+
+  --popover: #0a0d14;
+  --popover-foreground: #f8fafc;
+
+  --primary: #6366f1;
+  --primary-foreground: #ffffff;
+
+  --secondary: #121826;
+  --secondary-foreground: #e2e8f0;
+
+  --muted: #0f1523;
+  --muted-foreground: #94a3b8;
+
+  --accent: #151c30;
+  --accent-foreground: #c7d2fe;
+
+  --violet: #8b5cf6;
+  --violet-soft: #241f3f;
+
+  --success: #34d399;
+  --success-soft: #0d2f24;
+  --warning: #fbbf24;
+  --warning-soft: #3a2c0a;
+  --danger: #f87171;
+  --danger-soft: #3d1b21;
+
+  --border: rgba(255, 255, 255, 0.1);
+  --input: rgba(255, 255, 255, 0.14);
+  --ring: #a5b4fc;
+
+  --accent-cta: var(--accent-cyan);
+  --accent-cta-soft: #0b3038;
+}
+
+/* Optional clean light variant — same indigo/cyan/purple accents on white. */
+.light {
+  --background: #f6f8fc;
+  --foreground: #172033;
+
+  --card: #ffffff;
+  --card-foreground: #0b0f19;
+
+  --popover: #ffffff;
+  --popover-foreground: #0b0f19;
+
+  --primary: #6366f1;
+  --primary-foreground: #ffffff;
+
+  --secondary: #eef0f8;
+  --secondary-foreground: #202838;
+
+  --muted: #eef0f8;
+  --muted-foreground: #5b6478;
+
+  --accent: #ece9fd;
+  --accent-foreground: #4f46e5;
+
+  --violet: #8b5cf6;
+  --violet-soft: #f4effd;
+
+  --success: #0f9d6e;
+  --success-soft: #e4f7ef;
+  --warning: #b45309;
+  --warning-soft: #fdf3e3;
+  --danger: #e0353c;
+  --danger-soft: #fdecec;
+
+  --border: rgba(99, 102, 241, 0.14);
+  --input: #d5dae6;
+  --ring: #6366f1;
+
+  --accent-cta: #0891b2;
+  --accent-cta-soft: #e4f7fb;
 }
 
 @theme inline {
@@ -119,16 +176,16 @@
   --radius-xl: calc(var(--radius) + 4px);
   --radius-2xl: calc(var(--radius) + 8px);
 
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
-  --font-display: var(--font-saira-condensed), "Saira Condensed", "Arial Narrow", sans-serif;
+  --font-sans: "Avenir Next", "Segoe UI", sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  --font-display: "Avenir Next", "Segoe UI", sans-serif;
 
-  --shadow-card: 0 1px 2px 0 rgb(15 23 42 / 0.04), 0 1px 3px 0 rgb(15 23 42 / 0.06);
-  --shadow-card-hover: 0 4px 6px -1px rgb(15 23 42 / 0.07), 0 10px 20px -6px rgb(15 23 42 / 0.12);
-  --shadow-glow: 0 0 0 1px rgb(59 130 246 / 0.12), 0 12px 40px -8px rgb(37 99 235 / 0.35);
-  --shadow-glass: 0 8px 32px 0 rgb(31 38 135 / 0.08), 0 1px 2px 0 rgb(15 23 42 / 0.06);
-  --shadow-glass-hover: 0 12px 48px 0 rgb(31 38 135 / 0.14), 0 4px 12px 0 rgb(15 23 42 / 0.1);
-  --shadow-glow-accent: 0 0 0 1px rgb(234 88 12 / 0.14), 0 12px 44px -8px rgb(234 88 12 / 0.4);
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px 0 rgb(0 0 0 / 0.03), 0 0 0 1px rgb(0 0 0 / 0.02);
+  --shadow-card-hover: 0 24px 48px -16px rgb(2 6 23 / 0.55), 0 8px 16px -8px rgb(2 6 23 / 0.45);
+  --shadow-glow: 0 0 0 1px rgb(99 102 241 / 0.16), 0 16px 48px -12px rgb(99 102 241 / 0.5);
+  --shadow-glass: 0 16px 42px -20px rgb(51 65 105 / 0.3), 0 0 0 1px rgb(255 255 255 / 0.6) inset;
+  --shadow-glass-hover: 0 24px 55px -22px rgb(51 65 105 / 0.38), 0 0 0 1px rgb(255 255 255 / 0.8) inset;
+  --shadow-glow-accent: 0 0 0 1px rgb(6 182 212 / 0.18), 0 16px 48px -12px rgb(6 182 212 / 0.45);
 
   --animate-fade-in: fade-in 0.4s ease-out both;
   --animate-slide-up: slide-up 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -140,6 +197,56 @@
   --animate-gradient-shift: gradient-shift 8s ease infinite;
   --animate-blur-in: blur-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
   --animate-orb: orb-drift 18s ease-in-out infinite;
+  --animate-ring-pulse: ring-pulse 3.2s ease-out infinite;
+  --animate-spin-slow: spin-slow 28s linear infinite;
+  --animate-bounce-soft: bounce-soft 5s ease-in-out infinite;
+  --animate-pulse-dot: pulse-dot 2.4s ease-in-out infinite;
+  --animate-float-sm: float-sm 6s ease-in-out infinite;
+  --animate-twinkle: twinkle 4s ease-in-out infinite;
+  --animate-aurora: aurora 14s ease-in-out infinite;
+  --animate-marquee: marquee 32s linear infinite;
+  --animate-wave: wave 7s ease-in-out infinite;
+
+  @keyframes ring-pulse {
+    0% { transform: scale(0.92); opacity: 0.75; }
+    70% { transform: scale(1.18); opacity: 0; }
+    100% { transform: scale(1.18); opacity: 0; }
+  }
+  @keyframes spin-slow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  @keyframes bounce-soft {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 0.45; transform: scale(0.86); }
+    50% { opacity: 1; transform: scale(1); }
+  }
+  @keyframes float-sm {
+    0%, 100% { transform: translateY(0) translateX(0); }
+    50% { transform: translateY(-8px) translateX(4px); }
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.15; transform: scale(0.7); }
+    50% { opacity: 1; transform: scale(1.15); }
+  }
+  @keyframes aurora {
+    0%, 100% { background-position: 0% 50%; transform: rotate(0deg) scale(1.04); }
+    25% { background-position: 100% 50%; }
+    50% { background-position: 0% 100%; transform: rotate(4deg) scale(1); }
+    75% { background-position: 100% 0%; }
+  }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  @keyframes wave {
+    0%, 100% { transform: translateX(0) rotate(0deg); }
+    25% { transform: translateX(6px) rotate(2deg); }
+    75% { transform: translateX(-6px) rotate(-2deg); }
+  }
 
   @keyframes fade-in {
     from { opacity: 0; }
@@ -202,28 +309,40 @@ html {
 }
 
 body {
-  background: var(--background);
+  background:
+    radial-gradient(circle at 8% 0%, rgb(99 102 241 / 0.1), transparent 28rem),
+    radial-gradient(circle at 92% 8%, rgb(6 182 212 / 0.09), transparent 30rem),
+    var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
-/* Display font (Saira Condensed) for headings and brand — body text stays
-   in the sans font for readability. */
+/* Display font (Apple SF Pro Display stack) for headings and brand — body
+   text stays in the sans font for readability. */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
-  line-height: 1.1;
-  letter-spacing: -0.01em;
+  line-height: 1.08;
+  letter-spacing: -0.022em;
 }
 
 /* Subtle grid + glow used in hero sections */
 .hero-grid {
   background-image:
-    linear-gradient(to right, rgb(37 99 235 / 0.06) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(37 99 235 / 0.06) 1px, transparent 1px);
-  background-size: 48px 48px;
+    radial-gradient(circle, rgb(99 102 241 / 0.18) 1px, transparent 1.5px);
+  background-size: 28px 28px;
   mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 100%);
+}
+.light .hero-grid {
+  background-image:
+    radial-gradient(circle, rgb(99 102 241 / 0.12) 1px, transparent 1.5px);
+}
+.dark body {
+  background:
+    radial-gradient(circle at 12% 0%, rgb(99 102 241 / 0.12), transparent 30rem),
+    radial-gradient(circle at 88% 8%, rgb(6 182 212 / 0.08), transparent 32rem),
+    #030508;
 }
 
 .text-gradient {
@@ -238,9 +357,10 @@ h1, h2, h3, h4, h5, h6 {
   background: linear-gradient(
     120deg,
     var(--primary) 0%,
-    var(--violet) 30%,
-    var(--primary) 60%,
-    #f97316 95%
+    var(--violet) 28%,
+    var(--accent-cyan) 55%,
+    var(--primary) 78%,
+    var(--accent-purple) 100%
   );
   background-size: 220% 220%;
   -webkit-background-clip: text;
@@ -268,30 +388,32 @@ h1, h2, h3, h4, h5, h6 {
   animation: shimmer 1.8s linear infinite;
 }
 
-/* --- Glassmorphism utilities (UI UX Pro Max: "Glassmorphism" style) --- */
+/* --- Solid premium surface utilities ---
+   Solid surfaces (no translucency / backdrop blur) that read as crisp,
+   layered panels over the navy base. Class names are kept for stability. */
 
-/* Frosted panel — backdrop blur + translucent surface + hairline border */
+/* Layered panel — card surface + hairline border + soft shadow */
 .glass {
-  background: color-mix(in srgb, var(--card) 62%, transparent);
-  -webkit-backdrop-filter: blur(16px) saturate(160%);
-  backdrop-filter: blur(16px) saturate(160%);
-  border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+  background: var(--card);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(22px) saturate(145%);
+  -webkit-backdrop-filter: blur(22px) saturate(145%);
   box-shadow: var(--shadow-glass);
 }
 
 .glass-strong {
-  background: color-mix(in srgb, var(--card) 78%, transparent);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  backdrop-filter: blur(24px) saturate(180%);
-  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
-  box-shadow: var(--shadow-glass);
+  background: var(--popover);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(28px) saturate(150%);
+  -webkit-backdrop-filter: blur(28px) saturate(150%);
+  box-shadow: var(--shadow-card-hover);
 }
 
 .glass-surface {
-  background: color-mix(in srgb, var(--card) 88%, transparent);
-  -webkit-backdrop-filter: blur(12px) saturate(140%);
-  backdrop-filter: blur(12px) saturate(140%);
-  border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  background: color-mix(in srgb, var(--card) 88%, var(--background));
+  border: 1px solid var(--border);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
 }
 
 .glass-hover {
@@ -318,10 +440,10 @@ h1, h2, h3, h4, h5, h6 {
     padding: 1px;
     background: linear-gradient(
       135deg,
-      color-mix(in srgb, var(--primary) 45%, transparent),
-      color-mix(in srgb, var(--violet) 25%, transparent) 45%,
+      color-mix(in srgb, var(--primary) 55%, transparent),
+      color-mix(in srgb, var(--violet) 40%, transparent) 45%,
       color-mix(in srgb, var(--border) 30%, transparent) 70%,
-      color-mix(in srgb, var(--accent-cta) 35%, transparent)
+      color-mix(in srgb, var(--accent-cyan) 45%, transparent)
     );
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
@@ -339,10 +461,10 @@ h1, h2, h3, h4, h5, h6 {
 /* Animated ambient gradient mesh used behind hero / CTA panels */
 .hero-mesh {
   background:
-    radial-gradient(48% 44% at 12% 18%, rgb(37 99 235 / 0.14) 0%, transparent 100%),
-    radial-gradient(42% 38% at 88% 12%, rgb(14 165 233 / 0.12) 0%, transparent 100%),
-    radial-gradient(52% 46% at 76% 84%, rgb(37 99 235 / 0.1) 0%, transparent 100%),
-    radial-gradient(40% 36% at 20% 80%, rgb(234 88 12 / 0.07) 0%, transparent 100%);
+    radial-gradient(48% 44% at 12% 18%, var(--glow-color) 0%, transparent 100%),
+    radial-gradient(42% 38% at 88% 12%, rgb(139 92 246 / 0.14) 0%, transparent 100%),
+    radial-gradient(52% 46% at 76% 84%, rgb(6 182 212 / 0.1) 0%, transparent 100%),
+    radial-gradient(40% 36% at 20% 80%, rgb(99 102 241 / 0.1) 0%, transparent 100%);
 }
 
 /* Soft glowing orb */
@@ -380,8 +502,174 @@ h1, h2, h3, h4, h5, h6 {
 /* Subtle noisy grid overlay for app background */
 .app-grid {
   background-image:
-    radial-gradient(circle at 1px 1px, rgb(99 102 241 / 0.045) 1px, transparent 0);
-  background-size: 24px 24px;
+    radial-gradient(circle at 1px 1px, rgb(99 102 241 / 0.07) 1px, transparent 0);
+  background-size: 26px 26px;
+}
+.light .app-grid {
+  background-image:
+    radial-gradient(circle at 1px 1px, rgb(99 102 241 / 0.09) 1px, transparent 0);
+}
+
+/* --- Apple-style premium utilities --- */
+
+/* Aurora gradient panel — used for CTA / feature highlights */
+.aurora {
+  background: linear-gradient(
+    120deg,
+    var(--primary) 0%,
+    #4f46e5 25%,
+    #06b6d4 52%,
+    #8b5cf6 76%,
+    var(--primary) 100%
+  );
+  background-size: 240% 240%;
+  animation: aurora 14s ease-in-out infinite;
+}
+
+/* Premium gradient icon chip — squircle tile with inner highlight + glow ring */
+.grad-icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.6rem;
+  background: linear-gradient(
+    145deg,
+    var(--g1, var(--primary)),
+    var(--g2, var(--violet)) 70%,
+    var(--g3, var(--accent-cyan))
+  );
+  color: #fff;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.35),
+    0 8px 22px -6px color-mix(in srgb, var(--primary) 55%, transparent);
+  overflow: hidden;
+}
+.grad-icon::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 80% at 30% 0%, rgb(255 255 255 / 0.22), transparent 55%);
+  pointer-events: none;
+}
+.grad-icon-tint {
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--primary) 14%, transparent),
+    color-mix(in srgb, var(--violet) 12%, transparent)
+  );
+  color: var(--primary);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.5),
+    inset 0 0 0 1px color-mix(in srgb, var(--ring) 18%, transparent);
+}
+
+/* Solid accent tint — premium floating chip (indigo wash, no blur) */
+.glass-tint {
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary) 22%, transparent);
+  backdrop-filter: blur(18px) saturate(150%);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+}
+
+.liquid-glass {
+  background:
+    linear-gradient(135deg, rgb(255 255 255 / 0.72), rgb(255 255 255 / 0.35)),
+    radial-gradient(circle at 12% 0%, rgb(99 102 241 / 0.16), transparent 42%),
+    radial-gradient(circle at 100% 100%, rgb(6 182 212 / 0.12), transparent 44%);
+  border: 1px solid rgb(255 255 255 / 0.78);
+  box-shadow: var(--shadow-glass);
+  backdrop-filter: blur(28px) saturate(155%);
+  -webkit-backdrop-filter: blur(28px) saturate(155%);
+}
+
+.dark .liquid-glass {
+  background:
+    linear-gradient(135deg, rgb(18 24 38 / 0.78), rgb(18 24 38 / 0.45)),
+    radial-gradient(circle at 12% 0%, rgb(99 102 241 / 0.2), transparent 42%),
+    radial-gradient(circle at 100% 100%, rgb(6 182 212 / 0.12), transparent 44%);
+  border-color: rgb(255 255 255 / 0.14);
+}
+
+/* Radial glow ring used behind featured objects/illustrations */
+.ring-halo {
+  position: relative;
+}
+.ring-halo::before {
+  content: "";
+  position: absolute;
+  inset: -12%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--primary) 22%, transparent),
+    transparent 68%
+  );
+  animation: ring-pulse 3.2s ease-out infinite;
+  pointer-events: none;
+}
+
+/* Soft "press" surface for interactive tiles */
+.btn-press {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
+}
+.btn-press:hover {
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: var(--shadow-card-hover);
+}
+.btn-press:active {
+  transform: translateY(0) scale(0.99);
+}
+
+/* Spinning conic ring — decorative tech accent */
+.conic-ring {
+  background: conic-gradient(
+    from 0deg,
+    transparent 0%,
+    var(--primary) 22%,
+    var(--violet) 42%,
+    transparent 62%
+  );
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+}
+
+/* Animated shimmer text — slow premium gradient sweep */
+.text-shimmer {
+  background: linear-gradient(
+    110deg,
+    var(--foreground) 40%,
+    var(--primary) 50%,
+    var(--foreground) 60%
+  );
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gradient-shift 6s ease infinite;
+}
+
+/* Hairline top light — the "water edge" highlight on frosted panels */
+.edge-light {
+  position: relative;
+}
+.edge-light::before {
+  content: "";
+  position: absolute;
+  inset-x: 12%;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.7), transparent);
+  pointer-events: none;
+}
+
+/* Conic gradient ring spinner tile (used in processing states) */
+.spin-tile {
+  position: relative;
+  border-radius: 9999px;
+  padding: 5px;
+  background: conic-gradient(from 200deg, var(--primary), var(--violet), var(--primary));
+  animation: spin-slow 8s linear infinite;
 }
 
 /* Accessible focus rings */
@@ -391,7 +679,10 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 ::selection {
-  background: rgb(59 130 246 / 0.25);
+  background: rgb(99 102 241 / 0.32);
+}
+.light ::selection {
+  background: rgb(99 102 241 / 0.2);
 }
 
 /* Custom scrollbar (webkit) */

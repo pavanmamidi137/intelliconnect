@@ -45,6 +45,14 @@ export const peopleService = {
     return api.post<import("@/types").ImportResult>("/people/import/", form);
   },
 
+  async bulkCreate(payload: { names: string; department?: string; designation?: string }) {
+    return api.post<import("@/types").ImportResult>("/people/bulk/", payload);
+  },
+
+  async bulkRemove(ids: string[]) {
+    return api.post<{ deleted: number }>("/people/bulk_delete/", { ids });
+  },
+
   async facets() {
     return api.get<{ departments: string[]; designations: string[] }>("/people/facets/");
   },

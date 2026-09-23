@@ -46,11 +46,10 @@ export function HowItWorks() {
           transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
           className="mx-auto max-w-2xl text-center"
         >
-          <span className="inline-flex items-center gap-2 rounded-full border border-violet/20 bg-violet-soft px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-violet">
+          <span className="inline-flex items-center gap-2 rounded-full border border-violet/20 bg-violet-soft px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-violet shadow-[var(--shadow-glass)]">
             <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
             Workflow
-          </span>
-          <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+          </span>  <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             How It Works
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
@@ -65,7 +64,7 @@ export function HowItWorks() {
             whileInView={{ scaleX: 1 }}
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute left-0 right-0 top-6 h-px origin-left bg-gradient-to-r from-blue-500/50 via-sky-500/40 to-blue-500/50"
+            className="absolute left-0 right-0 top-6 h-px origin-left bg-gradient-to-r from-[#6366f1]/60 via-[#06b6d4]/50 to-[#8b5cf6]/60"
             aria-hidden="true"
           />
           <div className="grid grid-cols-4 gap-8">
@@ -79,15 +78,13 @@ export function HowItWorks() {
                 className="gradient-border glass glass-hover group relative rounded-2xl p-5"
                 whileHover={{ y: -5 }}
               >
-                <div className="relative z-10 mb-5 inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-blue-500/25 bg-background shadow-[var(--shadow-card)] transition-all duration-300 group-hover:scale-110 group-hover:border-primary/40 group-hover:shadow-[var(--shadow-glow)]">
-                  <step.icon className="h-5 w-5 text-primary" aria-hidden="true" />
-                </div>
-                <div className="mb-1.5 flex items-center gap-2">
-                  <span className="text-xs font-bold uppercase tracking-widest text-primary">
-                    Step {step.step}
+                <div className="grad-icon relative h-12 w-12 rounded-2xl" style={{ animationDelay: `${0.4 + index * 0.2}s` }}>
+                  <step.icon className="h-5 w-5" aria-hidden="true" />
+                  <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-card text-[9px] font-bold text-primary shadow-[var(--shadow-card)]">
+                    {step.step}
                   </span>
                 </div>
-                <h3 className="text-base font-semibold text-foreground">{step.title}</h3>
+                <h3 className="mt-4 text-base font-semibold text-foreground">{step.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                   {step.description}
                 </p>
@@ -103,7 +100,7 @@ export function HowItWorks() {
             whileInView={{ scaleY: 1 }}
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute bottom-6 left-6 top-6 w-px origin-top bg-gradient-to-b from-blue-500/50 to-sky-500/50"
+            className="absolute bottom-6 left-6 top-6 w-px origin-top bg-gradient-to-b from-[#6366f1]/60 to-[#06b6d4]/60"
             aria-hidden="true"
           />
           {STEPS.map((step, index) => (
@@ -115,13 +112,10 @@ export function HowItWorks() {
               transition={{ duration: 0.5, delay: 0.06 * index, ease: [0.16, 1, 0.3, 1] }}
               className="glass glass-hover relative flex gap-5 rounded-2xl p-4"
             >
-              <div className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-blue-500/25 bg-background shadow-[var(--shadow-card)]">
-                <step.icon className="h-5 w-5 text-primary" aria-hidden="true" />
-              </div>
-              <div>
-                <div className="text-xs font-bold uppercase tracking-widest text-primary">
-                  Step {step.step}
+              <div className="grad-icon relative h-12 w-12 shrink-0 rounded-2xl">
+                  <step.icon className="h-5 w-5" aria-hidden="true" />
                 </div>
+                <div>
                 <h3 className="mt-1 text-base font-semibold text-foreground">{step.title}</h3>
                 <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
                   {step.description}

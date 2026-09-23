@@ -31,7 +31,7 @@ export function OrganizationsSection() {
           transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
           className="mx-auto max-w-2xl text-center"
         >
-          <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-primary">
+          <span className="glass-tint inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-primary shadow-[var(--shadow-glass)]">
             <Building2 className="h-3.5 w-3.5" aria-hidden="true" />
             Audiences
           </span>
@@ -54,7 +54,7 @@ export function OrganizationsSection() {
               whileHover={{ y: -4, scale: 1.02 }}
               className="gradient-border glass glass-hover group flex items-center gap-3 rounded-xl px-5 py-3.5"
             >
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500/15 to-sky-500/15 ring-1 ring-blue-500/20 transition-transform duration-300 group-hover:scale-110">
+              <span className="grad-icon-tint flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110">
                 <item.icon className="h-4.5 w-4.5 text-primary" aria-hidden="true" />
               </span>
               <div>

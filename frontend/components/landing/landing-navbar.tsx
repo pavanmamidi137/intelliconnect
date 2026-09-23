@@ -36,8 +36,8 @@ export function LandingNavbar() {
       className={cn(
         "fixed inset-x-0 top-0 z-50 transition-all duration-500",
         scrolled
-          ? "glass-strong border-x-0 border-t-0"
-          : "border-b border-transparent bg-transparent"
+          ? "border-b border-border/80 bg-card/70 shadow-[var(--shadow-glass-hover)] backdrop-blur-xl"
+          : "border-b border-transparent bg-background/35 backdrop-blur-md"
       )}
     >
       <nav

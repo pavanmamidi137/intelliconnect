@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { dashboardService } from "@/services/dashboard";
+import { useAuth } from "@/hooks/use-auth";
 import type { DashboardStats, MeetingStatus } from "@/types";
 import { formatDate, pluralize } from "@/lib/utils";
 
@@ -103,9 +104,9 @@ function StatCard({
       transition={{ duration: 0.5, delay, ease: [0.16, 1, 0.3, 1] }}
       className="gradient-border glass glass-hover group relative overflow-hidden rounded-xl p-5"
     >
-      <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-gradient-to-br from-blue-500/10 to-sky-500/5 blur-2xl transition-opacity duration-300 group-hover:opacity-100" aria-hidden="true" />
+      <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-gradient-to-br from-[#6366f1]/10 to-[#06b6d4]/5 blur-2xl transition-opacity duration-300 group-hover:opacity-100" aria-hidden="true" />
       <div className="flex items-start gap-4">
-        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/15 to-sky-500/15 ring-1 ring-blue-500/20 transition-transform duration-300 group-hover:scale-110`}>
+        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#6366f1]/15 to-[#06b6d4]/15 ring-1 ring-[#6366f1]/20 transition-transform duration-300 group-hover:scale-110`}>
           <Icon className={`h-5 w-5 ${accent}`} aria-hidden="true" />
         </div>
         <div className="min-w-0">
@@ -137,9 +138,11 @@ function DashboardSkeleton() {
 }
 
 export default function HostDashboardPage() {
+  const { isAuthenticated, loading: authLoading, isAdmin } = useAuth();
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["host-dashboard"],
     queryFn: dashboardService.host,
+    enabled: isAuthenticated && !authLoading && !isAdmin,
   });
 
   const stats: DashboardStats | undefined = data?.stats;
@@ -311,7 +314,7 @@ export default function HostDashboardPage() {
                       href={`/meetings/${meeting.id}`}
                       className="group flex items-center gap-4 rounded-lg border border-border/60 bg-card/40 p-3.5 transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:bg-accent/40 hover:shadow-[var(--shadow-card-hover)]"
                     >
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500/15 to-sky-500/15 ring-1 ring-blue-500/20 transition-transform duration-300 group-hover:scale-110">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#6366f1]/15 to-[#06b6d4]/15 ring-1 ring-[#6366f1]/20 transition-transform duration-300 group-hover:scale-110">
                         <Video className="h-4.5 w-4.5 text-primary" aria-hidden="true" />
                       </div>
                       <div className="min-w-0 flex-1">

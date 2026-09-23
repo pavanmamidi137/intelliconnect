@@ -84,7 +84,7 @@ export function AppSidebar({ mobile = false, open = false, onClose }: AppSidebar
               {active && (
                 <motion.span
                   layoutId={mobile ? "mobile-active-pill" : "desktop-active-pill"}
-                  className="gradient-border absolute inset-0 rounded-lg bg-gradient-to-r from-primary/15 via-blue-500/10 to-sky-500/15"
+                  className="gradient-border absolute inset-0 rounded-lg bg-gradient-to-r from-primary/15 via-primary/10 to-violet/15"
                   transition={{ type: "spring", stiffness: 380, damping: 32 }}
                   aria-hidden="true"
                 />
@@ -124,7 +124,7 @@ export function AppSidebar({ mobile = false, open = false, onClose }: AppSidebar
         />
         <div
           className={cn(
-            "glass-strong absolute inset-y-0 left-0 w-72 max-w-[85vw] border-r border-border shadow-2xl transition-transform duration-300 ease-out",
+            "glass-strong absolute inset-y-3 left-3 w-72 max-w-[85vw] rounded-3xl shadow-2xl transition-transform duration-300 ease-out",
             open ? "translate-x-0" : "-translate-x-full"
           )}
           role={open ? "dialog" : undefined}
@@ -139,8 +139,10 @@ export function AppSidebar({ mobile = false, open = false, onClose }: AppSidebar
   }
 
   return (
-    <aside className="glass-surface hidden w-64 shrink-0 border-r border-t-0 border-b-0 border-l-0 lg:block">
-      <div className="sticky top-0 h-screen">{content}</div>
+    <aside className="hidden w-56 shrink-0 p-3 lg:block">
+      <div className="glass-surface sticky top-3 h-[calc(100vh-1.5rem)] overflow-hidden rounded-3xl shadow-[var(--shadow-glass)]">
+        {content}
+      </div>
     </aside>
   );
 }

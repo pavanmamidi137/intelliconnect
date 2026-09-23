@@ -3,6 +3,8 @@
 import { motion } from "framer-motion";
 import { KeyRound, Lock, ShieldCheck, FileLock2 } from "lucide-react";
 
+import { SecurityShield } from "@/components/illustrations/security-shield";
+
 const ITEMS = [
   {
     icon: Lock,
@@ -30,7 +32,7 @@ export function SecuritySection() {
   return (
     <section id="security" className="relative overflow-hidden py-20 sm:py-28">
       <div
-        className="glow-orb right-[10%] top-[10%] h-72 w-72 bg-sky-500/10"
+        className="glow-orb right-[10%] top-[10%] h-72 w-72 bg-cyan-500/10"
         aria-hidden="true"
       />
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -52,17 +54,8 @@ export function SecuritySection() {
               IntelliConnect is built with production-level security in mind —
               from authentication to file storage to AI provider credentials.
             </p>
-            <div className="mt-6 flex items-center gap-3 rounded-xl border border-success/25 bg-success-soft/50 p-4 text-sm text-success shadow-[var(--shadow-glass)]">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-success-soft">
-                <ShieldCheck
-                  className="h-5 w-5 animate-[var(--animate-glow-pulse)]"
-                  aria-hidden="true"
-                />
-              </span>
-              <span>
-                No service-role keys, no AI keys, and no internal errors ever reach
-                the browser.
-              </span>
+            <div className="mt-6 flex justify-center sm:justify-start">
+              <SecurityShield className="w-56" />
             </div>
           </motion.div>
 
@@ -77,7 +70,7 @@ export function SecuritySection() {
                 whileHover={{ y: -5 }}
                 className="gradient-border glass glass-hover group rounded-2xl p-5"
               >
-                <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500/15 to-sky-500/15 ring-1 ring-blue-500/20 transition-transform duration-300 group-hover:scale-110">
+                <div className="grad-icon-tint mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110">
                   <item.icon className="h-5 w-5 text-primary" aria-hidden="true" />
                 </div>
                 <h3 className="text-sm font-semibold text-foreground">{item.title}</h3>

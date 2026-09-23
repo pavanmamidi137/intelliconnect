@@ -18,6 +18,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "mentioned_name", "task", "deadline", "priority", "status",
             "ai_confidence", "context", "source", "created_at",
             "person_id_field", "meeting_title",
+            "email_status", "email_sent_at", "email_error",
         ]
         read_only_fields = ["id", "meeting", "person", "created_at", "source"]
 
@@ -58,6 +59,7 @@ class TaskReviewSerializer(serializers.ModelSerializer):
             "id", "person", "person_name", "department", "designation",
             "mentioned_name", "task", "deadline", "priority", "status",
             "ai_confidence", "context", "source", "needs_confirmation", "candidates",
+            "email_status", "email_sent_at", "email_error",
         ]
 
     def get_needs_confirmation(self, obj):

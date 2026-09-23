@@ -93,7 +93,7 @@ function StatCard({
   return (
     <Card className="glass glass-hover transition-shadow">
       <CardContent className="flex items-center gap-4 p-5">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/15 to-sky-500/15 ring-1 ring-blue-500/20">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#6366f1]/15 to-[#06b6d4]/15 ring-1 ring-[#6366f1]/20">
           <Icon className={`h-5 w-5 ${accent}`} aria-hidden="true" />
         </div>
         <div>
@@ -200,7 +200,7 @@ function OverviewTab({ data }: { data: AdminDashboard }) {
               <StatusBar
                 key={status}
                 label={MEETING_STATUS_LABELS[status]}
-                count={stats.meetings_by_status[status] ?? 0}
+                count={stats.meetings_by_status[status]}
                 total={stats.meetings}
                 className={
                   status === "completed"
@@ -232,7 +232,7 @@ function OverviewTab({ data }: { data: AdminDashboard }) {
               <StatusBar
                 key={status}
                 label={TASK_STATUS_LABELS[status]}
-                count={stats.tasks_by_status[status] ?? 0}
+                count={stats.tasks_by_status[status]}
                 total={stats.tasks}
                 className={
                   status === "completed"
@@ -291,7 +291,7 @@ function OverviewTab({ data }: { data: AdminDashboard }) {
             ) : (
               data.recent_organizations.map((org) => (
                 <div key={org.id} className="glass glass-hover flex items-center gap-4 rounded-lg p-3.5">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500/15 to-sky-500/15">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#6366f1]/15 to-[#06b6d4]/15">
                     <Building2 className="h-4.5 w-4.5 text-primary" aria-hidden="true" />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -321,7 +321,7 @@ function OverviewTab({ data }: { data: AdminDashboard }) {
             ) : (
               data.recent_meetings.map((meeting) => (
                 <div key={meeting.id} className="glass glass-hover flex items-center gap-4 rounded-lg p-3.5">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500/15 to-sky-500/15">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#6366f1]/15 to-[#06b6d4]/15">
                     <Video className="h-4.5 w-4.5 text-primary" aria-hidden="true" />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -419,9 +419,9 @@ function OrganizationsTab() {
               </TableBody>
             </Table>
             <Pagination
-              page={query.data?.page ?? 1}
-              totalPages={query.data?.total_pages ?? 1}
-              count={query.data?.count ?? 0}
+              page={query.data!.page}
+              totalPages={query.data!.total_pages}
+              count={query.data!.count}
               onPage={setPage}
             />
           </>
@@ -515,9 +515,9 @@ function UsersTab() {
               </TableBody>
             </Table>
             <Pagination
-              page={query.data?.page ?? 1}
-              totalPages={query.data?.total_pages ?? 1}
-              count={query.data?.count ?? 0}
+              page={query.data!.page}
+              totalPages={query.data!.total_pages}
+              count={query.data!.count}
               onPage={setPage}
             />
           </>

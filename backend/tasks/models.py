@@ -18,6 +18,15 @@ class Task(models.Model):
         AI = "ai", "AI"
         MANUAL = "manual", "Manual"
 
+    class EmailStatus(models.TextChoices):
+        # No reliable email sent yet (not assigned, awaiting confirmation,
+        # or previous attempts did not reach the assignee).
+        PENDING = "pending", "Pending"
+        # Email accepted by the mail server and queued for the assignee.
+        DELIVERED = "delivered", "Delivered"
+        # The send attempt raised (invalid address, relay error, ...).
+        FAILED = "failed", "Failed"
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     meeting = models.ForeignKey(
         "meetings.Meeting",
@@ -52,6 +61,20 @@ class Task(models.Model):
         choices=Source.choices,
         default=Source.AI,
     )
+    # Set when a task-notification email was delivered through a reliable
+    # transport (configured SMTP, or Resend with a verified-domain sender).
+    # Left null when a send "succeeded" through a channel that cannot reach
+    # the assignee (e.g. Resend's onboarding@resend.dev default sender), so
+    # host confirmation will re-send instead of silently skipping.
+    notified_at = models.DateTimeField(null=True, blank=True)
+    # Email delivery tracking for the UI (Delivered / Pending / Failed + retry).
+    email_status = models.CharField(
+        max_length=16,
+        choices=EmailStatus.choices,
+        default=EmailStatus.PENDING,
+    )
+    email_sent_at = models.DateTimeField(null=True, blank=True)
+    email_error = models.CharField(max_length=500, blank=True, default="")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

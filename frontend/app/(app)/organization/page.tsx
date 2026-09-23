@@ -9,6 +9,7 @@ import {
   Globe,
   ListChecks,
   Pencil,
+  Plus,
   Users,
   Video,
 } from "lucide-react";
@@ -42,14 +43,16 @@ export default function OrganizationPage() {
   const [form, setForm] = useState<{
     name: string;
     organization_type: Organization["organization_type"];
+    custom_organization_type: string;
     website: string;
     description: string;
-  }>({ name: "", organization_type: "company", website: "", description: "" });
+  }>({ name: "", organization_type: "company", custom_organization_type: "", website: "", description: "" });
 
   const beginEdit = (org: NonNullable<typeof query.data>) => {
     setForm({
       name: org.name,
       organization_type: org.organization_type,
+      custom_organization_type: org.custom_organization_type,
       website: org.website,
       description: org.description,
     });
@@ -101,9 +104,16 @@ export default function OrganizationPage() {
         description="Your organization profile and workspace statistics."
         actions={
           !editing && (
-            <Button variant="outline" onClick={() => beginEdit(org)}>
-              <Pencil className="h-4 w-4" aria-hidden="true" /> Edit Organization
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" asChild>
+                <Link href="/register">
+                  <Plus className="h-4 w-4" aria-hidden="true" /> Add Organization
+                </Link>
+              </Button>
+              <Button variant="outline" onClick={() => beginEdit(org)}>
+                <Pencil className="h-4 w-4" aria-hidden="true" /> Edit Organization
+              </Button>
+            </div>
           )
         }
       />
@@ -126,6 +136,12 @@ export default function OrganizationPage() {
                     ))}
                   </Select>
                 </div>
+                {form.organization_type === "other" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="org-custom-type">Custom Organization Type</Label>
+                    <Input id="org-custom-type" value={form.custom_organization_type} onChange={(e) => setForm((f) => ({ ...f, custom_organization_type: e.target.value }))} placeholder="e.g. Research Collective" />
+                  </div>
+                )}
                 <div className="space-y-2">
                   <Label htmlFor="org-website">Website</Label>
                   <Input id="org-website" type="url" placeholder="https://…" value={form.website} onChange={(e) => setForm((f) => ({ ...f, website: e.target.value }))} />
@@ -147,14 +163,16 @@ export default function OrganizationPage() {
           ) : (
             <>
               <div className="flex items-start gap-4">
-                <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500/15 to-sky-500/15 ring-1 ring-blue-500/20">
+                <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#6366f1]/15 to-[#06b6d4]/15 ring-1 ring-[#6366f1]/20">
                   <Building2 className="h-7 w-7 text-primary" aria-hidden="true" />
                 </span>
                 <div>
                   <h2 className="text-xl font-bold text-foreground">{org.name}</h2>
                   <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
                     <Badge variant="secondary">
-                      {ORGANIZATION_TYPES.find((t) => t.value === org.organization_type)?.label ?? org.organization_type}
+                      {org.organization_type === "other" && org.custom_organization_type
+                        ? org.custom_organization_type
+                        : ORGANIZATION_TYPES.find((t) => t.value === org.organization_type)?.label ?? org.organization_type}
                     </Badge>
                     {org.website && (
                       <span className="inline-flex items-center gap-1.5">
@@ -201,13 +219,14 @@ export default function OrganizationPage() {
           </CardContent>
         </Card>
       )}
+
     </div>
   );
 }
 
 const TINTS = {
-  indigo: "from-blue-500/10 to-blue-500/5 text-primary ring-blue-500/20",
-  violet: "from-sky-500/10 to-sky-500/5 text-violet ring-sky-500/20",
+  indigo: "from-[#6366f1]/10 to-[#6366f1]/5 text-primary ring-[#6366f1]/20",
+  violet: "from-[#8b5cf6]/10 to-[#8b5cf6]/5 text-violet ring-[#8b5cf6]/20",
   emerald: "from-emerald-500/10 to-emerald-500/5 text-success ring-emerald-500/20",
   amber: "from-amber-500/10 to-amber-500/5 text-warning ring-amber-500/20",
 } as const;

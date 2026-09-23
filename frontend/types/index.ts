@@ -10,6 +10,7 @@ export interface Organization {
   id: string;
   name: string;
   organization_type: OrganizationType;
+  custom_organization_type: string;
   description: string;
   website: string;
   created_at: string;
@@ -123,6 +124,8 @@ export type TaskPriority = "high" | "medium" | "low";
 export type TaskStatus = "pending" | "in_progress" | "completed";
 export type TaskSource = "ai" | "manual";
 
+export type TaskEmailStatus = "pending" | "delivered" | "failed";
+
 export interface TaskCandidate {
   id: string;
   full_name: string;
@@ -147,6 +150,9 @@ export interface Task {
   source: TaskSource;
   needs_confirmation?: boolean;
   candidates?: TaskCandidate[];
+  email_status?: TaskEmailStatus;
+  email_sent_at?: string | null;
+  email_error?: string;
 }
 
 export interface PersonMention {

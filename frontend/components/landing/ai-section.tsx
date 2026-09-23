@@ -3,6 +3,8 @@
 import { motion } from "framer-motion";
 import { BrainCircuit, CheckCircle2, GitMerge, ShieldAlert } from "lucide-react";
 
+import { AIEngine } from "@/components/illustrations/ai-engine";
+
 const EXTRACTIONS = [
   "Summary",
   "Key points",
@@ -22,7 +24,7 @@ export function AISection() {
         aria-hidden="true"
       />
       <div
-        className="pointer-events-none absolute bottom-0 left-0 h-[320px] w-[320px] rounded-full bg-blue-500/10 blur-3xl"
+        className="pointer-events-none absolute bottom-0 left-0 h-[320px] w-[320px] rounded-full bg-cyan-500/10 blur-3xl"
         style={{ animation: "orb-drift 20s ease-in-out -8s infinite" }}
         aria-hidden="true"
       />
@@ -71,9 +73,11 @@ export function AISection() {
             transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
             className="space-y-4"
           >
+            <AIEngine className="my-4 scale-95 sm:ml-auto sm:mr-4" />
+
             <div className="gradient-border glass shine rounded-2xl p-6">
               <div className="mb-3 flex items-center gap-2">
-                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500/15 to-sky-500/15 ring-1 ring-blue-500/20">
+                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-[#6366f1]/15 via-[#8b5cf6]/12 to-[#06b6d4]/15 ring-1 ring-[#6366f1]/25">
                   <BrainCircuit className="h-5 w-5 text-primary" aria-hidden="true" />
                 </span>
                 <h3 className="font-semibold text-foreground">Structured JSON, Validated Output</h3>

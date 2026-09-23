@@ -19,6 +19,7 @@ class RegisterSerializer(serializers.Serializer):
         choices=Organization.OrganizationType.choices,
         default=Organization.OrganizationType.COMPANY,
     )
+    custom_organization_type = serializers.CharField(max_length=100, allow_blank=True, default="")
     designation = serializers.CharField(max_length=255, allow_blank=True, default="")
     department = serializers.CharField(max_length=255, allow_blank=True, default="")
 
@@ -35,12 +36,20 @@ class RegisterSerializer(serializers.Serializer):
         full_name = attrs.get("full_name", "").strip()
         if not full_name:
             raise serializers.ValidationError({"full_name": "Full name is required."})
+        if (
+            attrs.get("organization_type") == Organization.OrganizationType.OTHER
+            and not attrs.get("custom_organization_type", "").strip()
+        ):
+            raise serializers.ValidationError(
+                {"custom_organization_type": "Enter your organization type."}
+            )
         return attrs
 
     def create(self, validated_data):
         organization = Organization.objects.create(
             name=validated_data["organization_name"].strip(),
             organization_type=validated_data["organization_type"],
+            custom_organization_type=validated_data.get("custom_organization_type", "").strip(),
         )
         user = User.objects.create_user(
             email=validated_data["email"],

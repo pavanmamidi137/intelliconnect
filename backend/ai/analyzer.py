@@ -28,6 +28,7 @@ from meetings.models import (
 from people.models import Person
 from storage import get_storage
 from tasks.models import Task
+from tasks.notifications import send_task_notification
 
 from .matcher import best_match
 from .providers import resolve_chain
@@ -223,6 +224,19 @@ def _persist_analysis(meeting: Meeting, analysis: MeetingAnalysis, transcript: s
             )
         )
     Task.objects.bulk_create(task_rows)
+
+    # Notify the people auto-assigned on the first analysis. Pending tasks
+    # (below the confidence threshold) wait for host confirmation, which
+    # triggers the notification in the report/confirmation flow instead.
+    # Re-analyses skip notifications to avoid re-sending already-assigned mails.
+    if created:
+        for task in task_rows:
+            if (
+                task.person is not None
+                and task.ai_confidence is not None
+                and task.ai_confidence >= settings.AI_CONFIDENCE_THRESHOLD
+            ):
+                send_task_notification(task)
 
 
 def task_needs_confirmation(task: Task) -> bool:

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { motion } from "framer-motion";
@@ -28,13 +28,18 @@ const registerSchema = z
     confirm_password: z.string().min(1, "Confirm your password."),
     organization_name: z.string().min(2, "Enter your organization name."),
     organization_type: z.string().min(1, "Select an organization type."),
+    custom_organization_type: z.string().optional(),
     designation: z.string().optional(),
     department: z.string().optional(),
   })
   .refine((data) => data.password === data.confirm_password, {
     message: "Passwords do not match.",
     path: ["confirm_password"],
-  });
+  })
+  .refine(
+    (data) => data.organization_type !== "other" || Boolean(data.custom_organization_type?.trim()),
+    { message: "Enter your organization type.", path: ["custom_organization_type"] }
+  );
 
 type RegisterValues = z.infer<typeof registerSchema>;
 
@@ -47,11 +52,13 @@ export default function RegisterPage() {
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<RegisterValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: { organization_type: "company" },
   });
+  const organizationType = useWatch({ control, name: "organization_type" });
 
   const onSubmit = async (values: RegisterValues) => {
     setSubmitting(true);
@@ -63,6 +70,7 @@ export default function RegisterPage() {
         confirm_password: values.confirm_password,
         organization_name: values.organization_name,
         organization_type: values.organization_type,
+        custom_organization_type: values.custom_organization_type?.trim() ?? "",
         designation: values.designation ?? "",
         department: values.department ?? "",
       });
@@ -220,6 +228,20 @@ export default function RegisterPage() {
                   <p className="text-xs text-danger">{errors.organization_type.message}</p>
                 )}
               </div>
+              {organizationType === "other" && (
+                <div className="space-y-2">
+                  <Label htmlFor="custom_organization_type">Custom Organization Type</Label>
+                  <Input
+                    id="custom_organization_type"
+                    placeholder="e.g. Research Collective"
+                    aria-invalid={Boolean(errors.custom_organization_type)}
+                    {...register("custom_organization_type")}
+                  />
+                  {errors.custom_organization_type && (
+                    <p className="text-xs text-danger">{errors.custom_organization_type.message}</p>
+                  )}
+                </div>
+              )}
             </div>
           </motion.div>
 

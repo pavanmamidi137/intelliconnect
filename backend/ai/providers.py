@@ -12,6 +12,7 @@ Supported providers:
   * cerebras — Cerebras (secondary, OpenAI-compatible chat completions)
   * gemini   — Google Gemini (optional, native REST API)
   * openai   — OpenAI (optional, chat completions)
+  * nvidia   — NVIDIA (optional, hosted NIM — requires SSE streaming)
   * demo     — deterministic development-only provider, never enabled in
                production deployments (requires AI_ENABLE_DEMO=true)
 
@@ -86,6 +87,53 @@ def _strip_json_fences(raw: str) -> str:
     return cleaned.strip()
 
 
+def _api_error_message(response, fallback, limit: int = 200) -> str:
+    """Best-effort short human-readable reason from a provider error body."""
+    try:
+        payload = response.json()
+    except ValueError:
+        payload = None
+    message = ""
+    if isinstance(payload, dict):
+        error = payload.get("error") or payload
+        if isinstance(error, dict):
+            message = error.get("message") or ""
+    message = " ".join(str(message).strip().split())
+    if not message and response.text:
+        message = " ".join(response.text.strip().split())
+    return (message or fallback)[:limit]
+
+
+def _collect_stream_content(response: httpx.Response) -> str:
+    """Aggregate `content` deltas from an OpenAI-style SSE stream."""
+    parts = []
+    try:
+        for line in response.iter_lines():
+            line = line.strip()
+            if not line.startswith("data:"):
+                continue
+            data = line[len("data:"):].strip()
+            if not data or data == "[DONE]":
+                continue
+            try:
+                chunk = json.loads(data)
+            except (TypeError, ValueError):
+                continue
+            choices = chunk.get("choices") or []
+            if not choices:
+                continue
+            delta = choices[0].get("delta") or {}
+            text = delta.get("content")
+            if isinstance(text, str) and text:
+                parts.append(text)
+    finally:
+        response.close()
+    joined = "".join(parts).strip()
+    if not joined:
+        raise AIOutputError("The AI provider returned an empty response. Please retry.")
+    return joined
+
+
 class BaseProvider(ABC):
     name = "base"
     label = "Base"
@@ -119,7 +167,7 @@ class BaseProvider(ABC):
             ) from exc
 
 
-def _retry(fn: Callable[[], httpx.Response], attempts: int = 3, base_delay: float = 2.0) -> httpx.Response:
+def _retry(fn: Callable[[], httpx.Response], attempts: int = 2, base_delay: float = 1.0) -> httpx.Response:
     """Retry transient provider failures (429/5xx) with exponential backoff."""
     last_exc: Optional[Exception] = None
     for attempt in range(attempts):
@@ -162,7 +210,9 @@ class OpenAICompatibleProvider(BaseProvider):
                 f"The {self.label} provider is not configured. Add its API key to the backend environment."
             )
         try:
-            with httpx.Client(timeout=httpx.Timeout(120.0, connect=10.0)) as client:
+            with httpx.Client(
+                timeout=httpx.Timeout(settings.AI_PROVIDER_TIMEOUT_SECONDS, connect=10.0)
+            ) as client:
                 def _call():
                     return client.post(
                         self.api_url,
@@ -184,8 +234,9 @@ class OpenAICompatibleProvider(BaseProvider):
                 response = _retry(_call)
                 content = response.json()["choices"][0]["message"]["content"]
         except httpx.HTTPStatusError as exc:
+            detail = _api_error_message(exc.response, f"HTTP {exc.response.status_code}")
             raise AIProviderError(
-                f"{self.label} returned an error (HTTP {exc.response.status_code}). Please retry."
+                f"{self.label} returned an error: {detail} (HTTP {exc.response.status_code}). Please retry."
             ) from exc
         except httpx.HTTPError as exc:
             raise AIProviderError(f"Could not reach {self.label}. Please retry.") from exc
@@ -212,9 +263,96 @@ class OpenAIProvider(OpenAICompatibleProvider):
     api_url = "https://api.openai.com/v1/chat/completions"
 
 
+class NvidiaProvider(OpenAICompatibleProvider):
+    name = "nvidia"
+    label = "NVIDIA"
+    api_url = "https://integrate.api.nvidia.com/v1/chat/completions"
+
+    def __init__(self, api_key: str, model: str):
+        super().__init__(api_key, model)
+        self.max_tokens = settings.NVIDIA_MAX_TOKENS
+
+    def generate_structured(self, user_prompt, temperature=0.2) -> MeetingAnalysis:
+        if not self.configured:
+            raise AIProviderError(
+                "The NVIDIA provider is not configured. Add NVIDIA_API_KEY to the backend environment."
+            )
+        # NVIDIA's hosted endpoint only reliably serves *streaming* completions:
+        # a non-streaming (stream=false) request is accepted but never answered,
+        # timing out the request every time. Stream the SSE response and merge
+        # the `content` deltas instead.
+        payload = {
+            "model": self.model,
+            "temperature": temperature,
+            "max_tokens": self.max_tokens,
+            "stream": True,
+            "response_format": {"type": "json_object"},
+            "chat_template_kwargs": {"enable_thinking": False},
+            "messages": [
+                {"role": "system", "content": ANALYSIS_SYSTEM_PROMPT},
+                {"role": "user", "content": user_prompt},
+            ],
+        }
+        try:
+            # Streaming disables the overall deadline; each read still gets its
+            # own timeout so an idle/garbage stream fails instead of hanging.
+            with httpx.Client(
+                timeout=httpx.Timeout(None, connect=10.0, read=settings.NVIDIA_STREAM_TIMEOUT_SECONDS)
+            ) as client:
+                def _call():
+                    request = client.build_request(
+                        "POST",
+                        self.api_url,
+                        headers={
+                            "Authorization": f"Bearer {self.api_key}",
+                            "Content-Type": "application/json",
+                            "Accept": "text/event-stream",
+                        },
+                        json=payload,
+                    )
+                    response = client.send(request, stream=True)
+                    if response.status_code in (429, 500, 502, 503, 504):
+                        # Drop transient responses so their connection isn't held
+                        # open while the retry loop backs off.
+                        response.close()
+                    return response
+
+                # Attempt once: a read timeout means NVIDIA hasn't streamed any
+                # bytes within the budget, and retrying would double an already
+                # several-minute wait. Single attempt keeps the failure path fast.
+                response = _retry(_call, attempts=1)
+                content = _collect_stream_content(response)
+        except httpx.HTTPStatusError as exc:
+            detail = _api_error_message(exc.response, f"HTTP {exc.response.status_code}")
+            raise AIProviderError(
+                f"{self.label} returned an error: {detail} (HTTP {exc.response.status_code}). Please retry."
+            ) from exc
+        except httpx.HTTPError as exc:
+            raise AIProviderError(f"Could not reach {self.label}. Please retry.") from exc
+        except (KeyError, IndexError, TypeError) as exc:
+            raise AIOutputError(f"{self.label} returned an unexpected result. Please retry.") from exc
+        return self._parse(content)
+
+
 class GeminiProvider(BaseProvider):
     name = "gemini"
     label = "Gemini"
+
+    @staticmethod
+    def _extract_text(payload: dict) -> str:
+        candidates = payload.get("candidates") or []
+        if not candidates:
+            raise AIOutputError("Gemini returned no candidates. Please retry.")
+
+        parts = (candidates[0].get("content") or {}).get("parts") or []
+        for part in parts:
+            if isinstance(part, dict) and part.get("thought"):
+                continue
+            text = part.get("text") if isinstance(part, dict) else None
+            if isinstance(text, str) and text.strip():
+                return text
+
+        raise AIOutputError("Gemini returned no analyzable text. Please retry.")
 
     def generate_structured(self, user_prompt, temperature=0.2) -> MeetingAnalysis:
         if not self.configured:
@@ -238,7 +376,9 @@ class GeminiProvider(BaseProvider):
                 "thinkingBudget": settings.GEMINI_THINKING_BUDGET
             }
         try:
-            with httpx.Client(timeout=httpx.Timeout(180.0, connect=10.0)) as client:
+            with httpx.Client(
+                timeout=httpx.Timeout(settings.AI_PROVIDER_TIMEOUT_SECONDS, connect=10.0)
+            ) as client:
                 def _call():
                     return client.post(
                         url,
@@ -250,10 +390,11 @@ class GeminiProvider(BaseProvider):
                     )
 
                 response = _retry(_call)
-                text = response.json()["candidates"][0]["content"]["parts"][0]["text"]
+                text = self._extract_text(response.json())
         except httpx.HTTPStatusError as exc:
+            detail = _api_error_message(exc.response, f"HTTP {exc.response.status_code}")
             raise AIProviderError(
-                f"Gemini returned an error (HTTP {exc.response.status_code}). Please retry."
+                f"{self.label} returned an error: {detail} (HTTP {exc.response.status_code}). Please retry."
             ) from exc
         except httpx.HTTPError as exc:
             raise AIProviderError("Could not reach Gemini. Please retry.") from exc
@@ -337,6 +478,7 @@ _PROVIDER_CLASSES = {
     "cerebras": CerebrasProvider,
     "gemini": GeminiProvider,
     "openai": OpenAIProvider,
+    "nvidia": NvidiaProvider,
     "demo": DemoProvider,
 }
 
@@ -354,6 +496,7 @@ def _env_key(cls) -> str:
         CerebrasProvider: settings.CEREBRAS_API_KEY,
         GeminiProvider: settings.GEMINI_API_KEY,
         OpenAIProvider: settings.OPENAI_API_KEY,
+        NvidiaProvider: settings.NVIDIA_API_KEY,
         DemoProvider: "",
     }
     return key_map.get(cls, "")
@@ -365,6 +508,7 @@ def _env_model(cls) -> str:
         CerebrasProvider: settings.CEREBRAS_MODEL,
         GeminiProvider: settings.GEMINI_MODEL,
         OpenAIProvider: settings.OPENAI_MODEL,
+        NvidiaProvider: settings.NVIDIA_MODEL,
         DemoProvider: "demo",
     }
     return model_map.get(cls, "")
@@ -389,7 +533,7 @@ def resolve_chain() -> list[BaseProvider]:
 def provider_statuses() -> list[dict]:
     """Readiness of every provider for the AI settings page (no keys)."""
     statuses = []
-    for name in ["groq", "cerebras", "gemini", "openai"]:
+    for name in ["groq", "cerebras", "gemini", "openai", "nvidia"]:
         provider = build_provider(name)
         statuses.append(
             {

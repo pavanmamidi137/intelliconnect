@@ -27,7 +27,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { peopleService } from "@/services/people";
-import { meetingsService } from "@/services/meetings";
+import { meetingsService, tasksService } from "@/services/meetings";
 import { getErrorMessage } from "@/lib/utils";
 import type { Task } from "@/types";
 
@@ -94,6 +94,25 @@ export default function ReviewPage() {
     toast.success("Task removed.");
   };
 
+  const resendTaskEmail = async (taskId: string) => {
+    try {
+      const { task, sent } = await tasksService.resendEmail(taskId);
+      setTasks((current) =>
+        current.map((t) => (t.id === task.id ? task : t))
+      );
+      if (sent) {
+        toast.success("Email sent again — check the assignee's inbox.");
+      } else {
+        const noEmail = !task.person || !task.person_name;
+        toast.error(
+          noEmail ? "No assignee email on file." : "Email already delivered — no need to resend."
+        );
+      }
+    } catch (err) {
+      toast.error(getErrorMessage(err) || "Couldn't resend the email.");
+    }
+  };
+
   const addManualTask = () => {
     const text = newTaskText.trim();
     if (!text) return;
@@ -141,7 +160,30 @@ export default function ReviewPage() {
         })),
       };
       const response = await meetingsService.generateReport(id, payload);
-      toast.success("Report generated successfully.");
+      const results = response.email_results as
+        | { person: string | null; email: string | null; sent: boolean; reason: string }[]
+        | undefined;
+      const sent = results?.filter((r) => r.sent).length ?? 0;
+      const skipped = results?.filter((r) => r.reason === "no_email_on_file").length ?? 0;
+      const already = results?.filter((r) => r.reason === "already_notified").length ?? 0;
+      const failedSends = results?.filter((r) => r.reason === "send_failed").length ?? 0;
+      if (sent > 0) {
+        toast.success(`${sent} task email${sent === 1 ? "" : "s"} sent to assignees.`);
+      } else if (already > 0) {
+        toast.success(`${already} task email${already === 1 ? " was" : "s were"} already delivered.`);
+      } else if (failedSends > 0) {
+        toast.error(
+          `${failedSends} task email${failedSends === 1 ? "" : "s"} failed to send. Check the assignees' email addresses and try again.`
+        );
+      } else if (skipped > 0) {
+        toast.warning(
+          `Report generated — ${skipped} task${skipped === 1 ? "" : "s"} skipped because the assignee has no email on file.`
+        );
+      } else if (results && results.length > 0) {
+        toast.warning("Report generated, but task emails weren't sent. Check the assignee emails and try again.");
+      } else {
+        toast.success("Report generated successfully.");
+      }
       router.push(`/meetings/${id}?report=${response.report_id ?? ""}`);
     } catch (error) {
       toast.error(getErrorMessage(error, "We couldn't generate the report. Please try again."));
@@ -378,6 +420,7 @@ export default function ReviewPage() {
               people={people}
               onUpdate={updateTask}
               onRemove={removeTask}
+              onResend={resendTaskEmail}
             />
           ))}
 
@@ -409,7 +452,7 @@ export default function ReviewPage() {
 
       {/* Confirm */}
       <div className="sticky bottom-4 z-10">
-        <div className="flex flex-col items-center justify-between gap-3 rounded-2xl border border-border bg-card/95 p-4 shadow-2xl backdrop-blur sm:flex-row">
+        <div className="flex flex-col items-center justify-between gap-3 rounded-2xl border border-border bg-card/95 p-4 shadow-2xl sm:flex-row">
           <p className="text-sm text-muted-foreground">
             <strong className="text-foreground">{tasks.length}</strong> tasks ·{" "}
             <strong className="text-foreground">{decisions.filter(Boolean).length}</strong> decisions ·{" "}

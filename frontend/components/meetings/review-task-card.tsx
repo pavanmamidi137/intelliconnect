@@ -7,7 +7,10 @@ import {
   AlertTriangle,
   CalendarDays,
   Check,
+  MailCheck,
+  MailX,
   Pencil,
+  RefreshCw,
   Trash2,
   UserRound,
   X,
@@ -26,9 +29,10 @@ interface ReviewTaskCardProps {
   people: Person[];
   onUpdate: (id: string, patch: Partial<Task>) => void;
   onRemove: (id: string) => void;
+  onResend?: (id: string) => void;
 }
 
-export function ReviewTaskCard({ task, people, onUpdate, onRemove }: ReviewTaskCardProps) {
+export function ReviewTaskCard({ task, people, onUpdate, onRemove, onResend }: ReviewTaskCardProps) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState({ task: task.task, deadline: task.deadline ?? "" });
 
@@ -138,7 +142,7 @@ export function ReviewTaskCard({ task, people, onUpdate, onRemove }: ReviewTaskC
 
       {/* assignee */}
       <div className="mt-3 flex items-center gap-2">
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500/15 to-sky-500/15 text-primary">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#6366f1]/15 to-[#06b6d4]/15 text-primary">
           <UserRound className="h-4 w-4" aria-hidden="true" />
         </span>
         <Select
@@ -186,6 +190,39 @@ export function ReviewTaskCard({ task, people, onUpdate, onRemove }: ReviewTaskC
           )}
         </div>
       )}
+
+      {/* email delivery status + retry */}
+      <div className="mt-2 flex flex-wrap items-center gap-2 pl-10">
+        {task.email_status === "delivered" && (
+          <Badge variant="success" className="px-1.5 py-0 text-[10px]">
+            <MailCheck className="h-3 w-3" aria-hidden="true" /> Delivered
+          </Badge>
+        )}
+        {task.email_status === "failed" && (
+          <>
+            <Badge variant="danger" className="px-1.5 py-0 text-[10px]">
+              <MailX className="h-3 w-3" aria-hidden="true" /> Failed
+            </Badge>
+            <span className="max-w-[240px] truncate text-[10px] text-danger" title={task.email_error}>
+              {task.email_error || "Could not deliver the email."}
+            </span>
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-6 gap-1 px-2 text-[10px]"
+              onClick={() => onResend?.(task.id)}
+              aria-label="Retry sending task email"
+            >
+              <RefreshCw className="h-3 w-3" aria-hidden="true" /> Retry
+            </Button>
+          </>
+        )}
+        {(!task.email_status || task.email_status === "pending") && (
+          <Badge variant="secondary" className="px-1.5 py-0 text-[10px]">
+            Pending
+          </Badge>
+        )}
+      </div>
     </div>
   );
 }

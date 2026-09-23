@@ -19,18 +19,18 @@ export function EmptyState({ icon: Icon, title, description, action, className }
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
-        "glass glass-hover relative flex flex-col items-center justify-center overflow-hidden rounded-xl border-dashed border-border px-6 py-16 text-center",
+        "glass relative flex flex-col items-center justify-center overflow-hidden rounded-3xl border-border px-6 py-16 text-center",
         className
       )}
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-sky-500/3 to-orange-500/3 opacity-60" aria-hidden="true" />
+      <div className="absolute inset-x-16 top-8 h-32 rounded-full bg-gradient-to-br from-primary/15 via-violet/10 to-transparent blur-3xl" aria-hidden="true" />
       <div
-        className="relative mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500/15 to-sky-500/15 ring-1 ring-blue-500/20"
-        style={{ animation: "float 5s ease-in-out infinite" }}
+        className="relative flex h-16 w-16 items-center justify-center rounded-[1.3rem] bg-gradient-to-br from-primary/15 to-violet/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.5)]"
+        style={{ animation: "float-sm 6s ease-in-out infinite" }}
       >
         <Icon className="h-7 w-7 text-primary" aria-hidden="true" />
       </div>
-      <h3 className="relative text-lg font-semibold text-foreground">{title}</h3>
+      <h3 className="relative mt-6 text-lg font-semibold tracking-tight text-foreground">{title}</h3>
       {description && (
         <p className="relative mt-1.5 max-w-md text-sm leading-relaxed text-muted-foreground">{description}</p>
       )}
